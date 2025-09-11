@@ -1,6 +1,6 @@
 import { Outlet, ScrollRestoration } from "react-router";
 // import Navbar from "../commons/navbar";
-// import Header from "../components/Header";
+// import Header from "../commons/Header";
 
 export default function RootLayout() {
   return (
