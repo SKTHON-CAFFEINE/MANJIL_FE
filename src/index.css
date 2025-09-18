@@ -28,7 +28,8 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   min-height: 100vh;
-  max-width: 768px;
+  max-width: 390px;
+  overflow-x: hidden;
   margin: 0 auto;
 }
 
