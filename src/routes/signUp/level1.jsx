@@ -1,16 +1,32 @@
 import {
-    PageName,
+  Page,
+  PageName,
   InputGroup,
   Box,
   Text,
   Input,
   Fail,
-  Button
+  Button,
+  Level,
+  LevelBox,
 } from "./signUpStyle";
-export default function Level1({setLevel}) {
+import { useNavigate } from "react-router-dom";
+
+export default function Level1() {
+  const navigate=useNavigate();
+  const nextLevel=()=>{
+    navigate("/auth/signUp/level2")
+  }
+
   return (
-    <>
-    <PageName>회원가입</PageName>
+    <Page>
+      <LevelBox>
+        <Level $on={true} />
+        <Level />
+        <Level />
+        <Level />
+      </LevelBox>
+      <PageName>회원가입</PageName>
       <InputGroup>
         <Box>
           <Text>이메일</Text>
@@ -23,7 +39,7 @@ export default function Level1({setLevel}) {
           <Fail>비밀번호 형식에 맞지 않습니다.</Fail>
         </Box>
       </InputGroup>
-      <Button onClick={()=>setLevel(2)}>다음</Button>
-    </>
+      <Button onClick={()=>nextLevel()}>다음</Button>
+    </Page>
   );
 }

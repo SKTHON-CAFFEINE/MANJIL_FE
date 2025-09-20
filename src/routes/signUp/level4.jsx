@@ -1,7 +1,13 @@
-import { PageName, Explain, State, StateGroup,Button } from "./signUpStyle";
+import { Page, PageName, Explain, State, StateGroup, Button, Level, LevelBox } from "./signUpStyle";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+
 export default function Level4() {
   const [state, setState] = useState([false, false, false, false, false]);
+      const navigate = useNavigate();
+  const nextLevel = () => {
+    navigate("/auth/signUp");
+  };
 
   const stateChange = (s) => {
     switch (s) {
@@ -48,7 +54,13 @@ export default function Level4() {
     }
   };
   return (
-    <>
+    <Page>
+      <LevelBox>
+        <Level $on={true} />
+        <Level $on={true} />
+        <Level $on={true} />
+        <Level $on={true}/>
+      </LevelBox>
       <PageName>
         현재 관리 중이신 질환이 <br />
         있다면 선택해주세요.
@@ -71,7 +83,7 @@ export default function Level4() {
           골다공증
         </State>
       </StateGroup>
-      <Button>다음</Button>
-    </>
+      <Button onClick={() => nextLevel()}>다음</Button>
+    </Page>
   );
 }
