@@ -1,6 +1,9 @@
+import { useNavigate } from "react-router-dom";
 import styled from "styled-components";
 
 export default function ExerciseCard({ exercise, onClick }) {
+  const navigate = useNavigate();
+
   return (
     <ExerciseCardWrapper onClick={() => onClick(exercise.exerciseId)}>
       <CardFirstSection>
@@ -13,7 +16,7 @@ export default function ExerciseCard({ exercise, onClick }) {
       <ExerciseInfo>
         <ExerciseWarning>무거운 근력 운동, 갑작스러운 전력질주,</ExerciseWarning>
         <ExerciseWarning>점프 동작은 피하세요.</ExerciseWarning>
-        <DetailButton>자세히 보기</DetailButton>
+        <DetailButton onClick={() => navigate("/exercise-stage")}>자세히 보기</DetailButton>
       </ExerciseInfo>
     </ExerciseCardWrapper>
   );
