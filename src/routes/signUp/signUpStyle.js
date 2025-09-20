@@ -75,7 +75,6 @@ export const Input = styled.input`
 export const Fail = styled.div`
   width: 334px;
   flex-shrink: 0;
-  margin-top: 10px;
 
   color: var(--Negative-Color, #eb4335);
   font-family: Inter;
