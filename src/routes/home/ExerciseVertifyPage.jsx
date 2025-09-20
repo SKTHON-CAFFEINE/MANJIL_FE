@@ -159,8 +159,12 @@ export default function ExerciseVertifyPage() {
   };
 
   const handleCompleteClick = () => {
+    if(count>=exercise.reps){
     setShowCompleteModal(true);
     onModalChange(true);
+    } else {
+      alert("횟수를 모두 채워주세요.");
+    }
   };
 
   const handleCompleteCancelClick = () => {
