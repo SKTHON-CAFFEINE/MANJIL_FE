@@ -19,6 +19,7 @@ import VerifySquat from "./routes/verify/VerifySquat";
 import Calender from "./routes/calender/index";
 
 import My from "./routes/my/index";
+import MyPage from "./routes/my/mypage";
 
 const router = createBrowserRouter([
   // 일반 서비스 브랜치 (RootLayout 사용)
@@ -46,7 +47,7 @@ const router = createBrowserRouter([
           {
             path: "/my",
             children: [
-              { index: true, Component: My },
+              { index: true, Component: MyPage },
               // { path: "", Component:  },
             ],
           },
