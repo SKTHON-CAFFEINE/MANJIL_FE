@@ -22,6 +22,7 @@ export default function ExerciseVertifyPage() {
   const [, setAngle] = useState(0);
   const [showModal, setShowModal] = useState(false);
   const [isPaused, setIsPaused] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const landmarkerRef = useRef(null);
   const rafRef = useRef(0);
@@ -149,12 +150,23 @@ export default function ExerciseVertifyPage() {
   };
 
   const handleCompleteClick = () => {
+    setShowCompleteModal(true);
+    onModalChange(true);
+  };
+
+  const handleCompleteCancelClick = () => {
+    setShowCompleteModal(false);
+    onModalChange(false);
+  };
+
+  const handleCompleteConfirmClick = () => {
+    setShowCompleteModal(false);
+    onModalChange(false);
     // 운동 완료 시 카운트 리셋
     setCount(0);
     stop();
     setIsPaused(false);
-    // 운동 완료 후 다른 페이지로 이동하거나 성공 메시지 표시
-    alert("운동을 완료했습니다!");
+    navigate("/exercise-report");
   };
 
   useEffect(() => {
@@ -193,9 +205,7 @@ export default function ExerciseVertifyPage() {
             {exercise.unit}
           </VertifyTitle>
           <div style={{ display: "flex", gap: 8 }}>
-            <CameraButton onClick={start}>
-              {isPaused ? "운동 재개" : "카메라 켜기"}
-            </CameraButton>
+            <CameraButton onClick={start}>{isPaused ? "운동 재개" : "카메라 켜기"}</CameraButton>
           </div>
         </TopSection>
 
@@ -223,12 +233,20 @@ export default function ExerciseVertifyPage() {
           <ModalContainer>
             <ModalTitle>정말로 중단하시겠습니까?</ModalTitle>
             <ModalButtonContainer>
-              <ModalCancelButton onClick={handleCancelClick}>
-                취소
-              </ModalCancelButton>
-              <ModalConfirmButton onClick={handleConfirmClick}>
-                확인
-              </ModalConfirmButton>
+              <ModalCancelButton onClick={handleCancelClick}>취소</ModalCancelButton>
+              <ModalConfirmButton onClick={handleConfirmClick}>확인</ModalConfirmButton>
+            </ModalButtonContainer>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
+
+      {showCompleteModal && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitle>운동을 완료하시겠습니까?</ModalTitle>
+            <ModalButtonContainer>
+              <ModalCancelButton onClick={handleCompleteCancelClick}>취소</ModalCancelButton>
+              <ModalConfirmButton onClick={handleCompleteConfirmClick}>완료</ModalConfirmButton>
             </ModalButtonContainer>
           </ModalContainer>
         </ModalOverlay>
@@ -432,7 +450,7 @@ const ModalCancelButton = styled.button`
   font-weight: 500;
   border: none;
   cursor: pointer;
-  
+
   &:hover {
     background: #e8e8e8;
   }
@@ -449,7 +467,7 @@ const ModalConfirmButton = styled.button`
   font-weight: 500;
   border: none;
   cursor: pointer;
-  
+
   &:hover {
     background: #1e5ad4;
   }

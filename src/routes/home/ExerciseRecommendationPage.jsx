@@ -67,6 +67,7 @@ export default function ExerciseRecommendationPage() {
 
           // API 응답 구조에 맞춰 데이터 처리
           if (response.success && response.data && response.data.cards) {
+            console.log("운동 카드 데이터:", response.data.cards);
             setExercises(response.data.cards);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
@@ -79,8 +80,9 @@ export default function ExerciseRecommendationPage() {
             soreness: "NONE",
           };
           const response = await ExerciseAPI.getRecommendations(defaultConditionData);
-
+          
           if (response.success && response.data && response.data.cards) {
+            console.log("기본값 운동 카드 데이터:", response.data.cards);
             setExercises(response.data.cards);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
