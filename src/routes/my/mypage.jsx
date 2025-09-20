@@ -2,9 +2,27 @@ import styled from "styled-components";
 import badge from "../../shared/assets/icon/home/badge.svg";
 import right_button from "../../shared/assets/icon/right_button.svg";
 import { useNavigate } from "react-router-dom";
+import { useEffect,useState } from "react";
+import { APIService } from "../../shared/lib/api";
 
 export default function MyPage() {
   const navigate = useNavigate();
+  const [name,setName]=useState("사용자");
+  const [point,setPoint]=useState(0);
+
+  useEffect(()=>{
+    const getMyData=async ()=>{
+      try{
+      const response=await APIService.private.get("/users/summary");
+      setName(response.data.username);
+      setPoint(response.data.point);
+      }catch(error){
+        console.error('정보 불러오기 실패:', error);
+      }
+    }
+
+    getMyData();
+  })
 
   const otherPage = (o) => {
     switch (o) {
@@ -24,12 +42,12 @@ export default function MyPage() {
   return (
     <Page>
       <img src={badge} style={{ width: "149px", height: "149px" }} />
-      <Name>김향숙</Name>
+      <Name>{name}</Name>
       <NickName>프로운동러</NickName>
       <PointGroup>
         <PointBox>
           <PointText>나의 포인트</PointText>
-          <Point>3280 P</Point>
+          <Point>{point} P</Point>
         </PointBox>
         <PointBox>
           <PointText>포인트 SHOP</PointText>
