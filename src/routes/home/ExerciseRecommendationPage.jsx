@@ -84,6 +84,15 @@ export default function ExerciseRecommendationPage() {
             const today = new Date().toDateString();
             localStorage.setItem('lastRecommendationDate', today);
             console.log("오늘 운동 추천 완료 - localStorage에 저장:", today);
+            
+            // 추천 운동 목록도 localStorage에 저장 (캘린더 페이지에서 사용)
+            const exerciseData = {
+              exercises: response.data.cards,
+              diseases: response.data.diseases || [],
+              disclaimer: response.data.disclaimer || ""
+            };
+            localStorage.setItem(`recommendations_${today}`, JSON.stringify(exerciseData));
+            console.log("추천 운동 목록 저장됨:", exerciseData);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
           }
@@ -105,6 +114,15 @@ export default function ExerciseRecommendationPage() {
             const today = new Date().toDateString();
             localStorage.setItem('lastRecommendationDate', today);
             console.log("오늘 운동 추천 완료 (기본값) - localStorage에 저장:", today);
+            
+            // 추천 운동 목록도 localStorage에 저장 (캘린더 페이지에서 사용)
+            const exerciseData = {
+              exercises: response.data.cards,
+              diseases: response.data.diseases || [],
+              disclaimer: response.data.disclaimer || ""
+            };
+            localStorage.setItem(`recommendations_${today}`, JSON.stringify(exerciseData));
+            console.log("추천 운동 목록 저장됨 (기본값):", exerciseData);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
           }

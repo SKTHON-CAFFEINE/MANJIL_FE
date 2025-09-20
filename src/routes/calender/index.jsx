@@ -91,11 +91,38 @@ export default function ReportPage() {
   };
 
 
-  // API 요청 함수
+  // localStorage에서 저장된 추천 운동 목록 불러오기
+  const loadSavedRecommendations = useCallback((date) => {
+    const dateString = date.toDateString(); // "Mon Jan 01 2024" 형식
+    const savedData = localStorage.getItem(`recommendations_${dateString}`);
+    
+    if (savedData) {
+      try {
+        const parsedData = JSON.parse(savedData);
+        console.log("저장된 추천 운동 목록 불러옴:", parsedData);
+        setExercises(parsedData.exercises || []);
+        setDiseases(parsedData.diseases || []);
+        setDisclaimer(parsedData.disclaimer || "");
+        setError(null);
+        return true; // 저장된 데이터가 있음
+      } catch (err) {
+        console.error("저장된 데이터 파싱 오류:", err);
+      }
+    }
+    return false; // 저장된 데이터가 없음
+  }, []);
+
+  // API 요청 함수 (저장된 데이터가 없을 때만 호출)
   const fetchExercisesForDate = useCallback(
     async (date) => {
       setLoading(true);
       setError(null);
+
+      // 먼저 저장된 데이터가 있는지 확인
+      if (loadSavedRecommendations(date)) {
+        setLoading(false);
+        return;
+      }
 
       try {
         const dateString = date.toISOString().split("T")[0];
@@ -113,12 +140,26 @@ export default function ReportPage() {
         console.log("Response data:", response.data);
 
         if (response.success && response.data?.cards) {
-          setExercises(response.data.cards);
-          setDiseases(response.data.diseases || []);
-          setDisclaimer(response.data.disclaimer || "");
+          const exerciseData = {
+            exercises: response.data.cards,
+            diseases: response.data.diseases || [],
+            disclaimer: response.data.disclaimer || ""
+          };
           
-          console.log("Set diseases:", response.data.diseases);
-          console.log("Set disclaimer:", response.data.disclaimer);
+          setExercises(exerciseData.exercises);
+          setDiseases(exerciseData.diseases);
+          setDisclaimer(exerciseData.disclaimer);
+          
+          // localStorage에 저장 (오늘 날짜만)
+          const today = new Date().toDateString();
+          const targetDate = date.toDateString();
+          if (today === targetDate) {
+            localStorage.setItem(`recommendations_${targetDate}`, JSON.stringify(exerciseData));
+            console.log("오늘의 추천 운동 목록 저장됨:", exerciseData);
+          }
+          
+          console.log("Set diseases:", exerciseData.diseases);
+          console.log("Set disclaimer:", exerciseData.disclaimer);
         } else {
           setError("운동 데이터를 불러올 수 없습니다.");
         }
@@ -129,7 +170,7 @@ export default function ReportPage() {
         setLoading(false);
       }
     },
-    [conditions]
+    [conditions, loadSavedRecommendations]
   );
 
   // 컨디션 상태를 localStorage에 저장
