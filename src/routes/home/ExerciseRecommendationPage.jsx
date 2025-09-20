@@ -11,6 +11,8 @@ export default function ExerciseRecommendationPage() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
+  const [diseases, setDiseases] = useState([]);
+  const [disclaimer, setDisclaimer] = useState("");
 
   // 컨디션 데이터를 location state에서 가져오거나 localStorage에서 가져오기
   const getConditionData = useCallback(() => {
@@ -68,7 +70,14 @@ export default function ExerciseRecommendationPage() {
           // API 응답 구조에 맞춰 데이터 처리
           if (response.success && response.data && response.data.cards) {
             console.log("운동 카드 데이터:", response.data.cards);
+            console.log("API 응답 전체:", response);
+            console.log("API 응답 데이터:", response.data);
+            console.log("Diseases in response:", response.data.diseases);
+            console.log("Disclaimer in response:", response.data.disclaimer);
+            
             setExercises(response.data.cards);
+            setDiseases(response.data.diseases || []);
+            setDisclaimer(response.data.disclaimer || "");
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
           }
@@ -116,10 +125,21 @@ export default function ExerciseRecommendationPage() {
   };
 
   const handleExerciseClick = (exercise) => {
-    // StageExercisePage로 이동하면서 운동 데이터 전달
+    console.log("ExerciseRecommendationPage - Diseases data:", diseases);
+    console.log("ExerciseRecommendationPage - Disclaimer:", disclaimer);
+    
+    const exerciseWithDiseases = {
+      ...exercise,
+      diseases: diseases,
+      disclaimer: disclaimer
+    };
+    
+    console.log("ExerciseRecommendationPage - Exercise with diseases:", exerciseWithDiseases);
+    
+    // StageExercisePage로 이동하면서 운동 데이터와 만성질환 정보 전달
     navigate("/exercise-stage", {
       state: {
-        exercise: exercise,
+        exercise: exerciseWithDiseases,
       },
     });
   };

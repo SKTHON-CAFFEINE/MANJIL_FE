@@ -6,11 +6,15 @@ export default function ExerciseCard({ exercise, onClick }) {
 
   const handleDetailClick = (e) => {
     e.stopPropagation(); // 부모 클릭 이벤트 방지
-    navigate("/exercise-stage", {
-      state: {
-        exercise: exercise,
-      },
-    });
+    if (onClick) {
+      onClick(exercise);
+    } else {
+      navigate("/exercise-stage", {
+        state: {
+          exercise: exercise,
+        },
+      });
+    }
   };
 
   // 안전한 이미지 URL 추출

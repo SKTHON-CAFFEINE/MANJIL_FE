@@ -11,6 +11,8 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
+  const [diseases, setDiseases] = useState([]);
+  const [disclaimer, setDisclaimer] = useState("");
 
   // 컨디션 상태 관리 (localStorage에서 불러오거나 기본값 설정)
   const [conditions, setConditions] = useState(() => {
@@ -52,10 +54,38 @@ export default function ReportPage() {
 
   // 맞춤 운동 다시하기 버튼 클릭 핸들러
   const handleRetryExercise = (exercise) => {
-    // 운동 단계 페이지로 이동하며 운동 데이터 전달
+    // 디버깅을 위한 콘솔 로그
+    console.log("Diseases data:", diseases);
+    console.log("Disclaimer:", disclaimer);
+    
+    // 임시 테스트 데이터 (API에서 데이터를 받지 못할 경우)
+    const testDiseases = diseases.length > 0 ? diseases : [
+      {
+        id: 1,
+        type: "고혈압",
+        caution: "운동 중 숨을 참지 말고, 자연스럽게 호흡하세요. 더운 날씨처럼 체온이 급격히 오르는 환경은 피하세요."
+      },
+      {
+        id: 3,
+        type: "고지혈증",
+        caution: "기름진 음식을 먹은 직후에는 운동을 피하세요. 갑작스러운 무리한 운동은 피하고, 단계적으로 강도를 올리세요. 가슴 통증이나 호흡 곤란이 느껴지면 바로 운동을 중단하세요."
+      }
+    ];
+    
+    const testDisclaimer = disclaimer || "일반적 가이드이며 진단/치료가 아닙니다. 개별 건강 상태에 따라 전문가와 상담하세요.";
+    
+    const exerciseWithDiseases = {
+      ...exercise,
+      diseases: testDiseases,
+      disclaimer: testDisclaimer
+    };
+    
+    console.log("Exercise with diseases:", exerciseWithDiseases);
+    
+    // 운동 단계 페이지로 이동하며 운동 데이터와 만성질환 정보 전달
     navigate("/exercise-stage", {
       state: {
-        exercise: exercise,
+        exercise: exerciseWithDiseases,
       },
     });
   };
@@ -79,8 +109,16 @@ export default function ReportPage() {
 
         const response = await ExerciseAPI.getRecommendationsByDate(dateString, conditionData);
 
+        console.log("API Response:", response);
+        console.log("Response data:", response.data);
+
         if (response.success && response.data?.cards) {
           setExercises(response.data.cards);
+          setDiseases(response.data.diseases || []);
+          setDisclaimer(response.data.disclaimer || "");
+          
+          console.log("Set diseases:", response.data.diseases);
+          console.log("Set disclaimer:", response.data.disclaimer);
         } else {
           setError("운동 데이터를 불러올 수 없습니다.");
         }

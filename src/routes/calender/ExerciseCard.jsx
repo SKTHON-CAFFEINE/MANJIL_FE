@@ -76,11 +76,15 @@ export default function ExerciseCard({ exercise, onClick, selectedDate }) {
            <ExerciseRetryButton
              onClick={(e) => {
                e.stopPropagation();
-               navigate("/exercise-stage", {
-                 state: {
-                   exercise: exercise,
-                 },
-               });
+               if (onClick) {
+                 onClick(exercise);
+               } else {
+                 navigate("/exercise-stage", {
+                   state: {
+                     exercise: exercise,
+                   },
+                 });
+               }
              }}
            >
             맞춤 운동 다시하기
