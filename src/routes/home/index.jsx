@@ -6,7 +6,8 @@ export default function RootPage() {
   const [hasToken, setHasToken] = useState(null); // 토큰 여부 판단 상태변수
 
   useEffect(() => {
-    const token = localStorage.getItem("accessToken");
+    let token = localStorage.getItem("accessToken");
+
     setHasToken(!!token); // 토큰 존재 -> true, 미존재 -> false
   }, []);
 

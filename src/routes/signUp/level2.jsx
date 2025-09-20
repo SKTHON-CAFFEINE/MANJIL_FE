@@ -10,12 +10,13 @@ import {
   LevelBox,
 } from "./signUpStyle";
 import styled from "styled-components";
-import { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import useAuthStore from "../stores/authStore";
 
 export default function Level2() {
-  const [gender, setGender] = useState();
   const navigate = useNavigate();
+  const { step2, setStep2Data } = useAuthStore();
+
   const nextLevel = () => {
     navigate("/auth/signUp/level3");
   };
@@ -32,15 +33,25 @@ export default function Level2() {
       <InputGroup>
         <Box>
           <Text>이름</Text>
-          <Input placeholder="이름을 입력하세요" />
+          <Input
+            placeholder="이름을 입력하세요"
+            value={step2.username}
+            onChange={(e) => setStep2Data({ username: e.target.value })}
+          />
         </Box>
         <Box>
           <Text>성별</Text>
           <GenderGroup>
-            <Gender onClick={() => setGender(0)} $on={gender ? 0 : 1}>
+            <Gender
+              onClick={() => setStep2Data({ gender: "FEMALE" })}
+              $on={step2.gender === "FEMALE" ? 1 : 0}
+            >
               여성
             </Gender>
-            <Gender onClick={() => setGender(1)} $on={gender ? 1 : 0}>
+            <Gender
+              onClick={() => setStep2Data({ gender: "MALE" })}
+              $on={step2.gender === "MALE" ? 1 : 0}
+            >
               남성
             </Gender>
           </GenderGroup>
@@ -48,7 +59,7 @@ export default function Level2() {
         <Box>
           <Text>나이</Text>
           <AgeGroup>
-            <Age />
+            <Age type="number" value={step2.age} onChange={(e) => setStep2Data({ age: e.target.value })} />
             <Text>세</Text>
           </AgeGroup>
         </Box>
