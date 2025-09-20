@@ -72,6 +72,11 @@ export const ExerciseAPI = {
     return await APIService.private.post("/reco/bodyweight", conditionData);
   },
 
+  // 특정 날짜의 운동 추천 생성 및 저장
+  getRecommendationsByDate: async (date, conditionData) => {
+    return await APIService.private.post(`/reco/bodyweight/${date}`, conditionData);
+  },
+
   // 운동 상세 정보 조회
   getExerciseDetail: async (exerciseId) => {
     return await APIService.private.get(`/exercise/${exerciseId}`);

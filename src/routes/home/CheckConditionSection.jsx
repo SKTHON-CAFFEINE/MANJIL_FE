@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router";
 import styled from "styled-components";
 import sleepIcon from "@icon/home/sleep.svg";
@@ -127,6 +127,24 @@ export default function CheckConditionSection({ onModalChange }) {
     muscle: null,
   });
   const [allConditionsStates, setAllConditionsStates] = useState(false);
+
+  // 컴포넌트 마운트 시 localStorage에서 컨디션 상태 복원
+  useEffect(() => {
+    const savedConditions = localStorage.getItem("userConditions");
+    if (savedConditions) {
+      try {
+        const parsedConditions = JSON.parse(savedConditions);
+        setConditionStates(parsedConditions);
+        
+        // 모든 컨디션이 설정되어 있으면 버튼 활성화
+        if (parsedConditions.sleep !== null && parsedConditions.fatigue !== null && parsedConditions.muscle !== null) {
+          setAllConditionsStates(true);
+        }
+      } catch (error) {
+        console.error("저장된 컨디션 데이터를 불러오는데 실패했습니다:", error);
+      }
+    }
+  }, []);
 
   const conditions = [
     {
