@@ -1,5 +1,5 @@
-import { useState } from "react";
-import { useNavigate } from "react-router";
+import { useState, useEffect } from "react";
+import { useNavigate, useLocation } from "react-router";
 import styled from "styled-components";
 import sleepIcon from "@icon/home/sleep.svg";
 import fatigueIcon from "@icon/home/fatigue.svg";
@@ -8,6 +8,7 @@ import angry from "@icon/home/angry.svg";
 import sad from "@icon/home/sad.svg";
 import smile from "@icon/home/smile.svg";
 import closeIcon from "@icon/home/closeButton.svg";
+import { UserAPI } from "../../shared/lib/api";
 
 // 각 컨디션별 모달 컴포넌트
 const SleepModal = ({ onClose, onSelect }) => (
@@ -120,6 +121,7 @@ const MuscleModal = ({ onClose, onSelect }) => (
 
 export default function CheckConditionSection({ onModalChange }) {
   const navigate = useNavigate();
+  const location = useLocation();
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [conditionStates, setConditionStates] = useState({
     sleep: null,
@@ -127,6 +129,96 @@ export default function CheckConditionSection({ onModalChange }) {
     muscle: null,
   });
   const [allConditionsStates, setAllConditionsStates] = useState(false);
+  const [userInfo, setUserInfo] = useState({
+    username: "사용자",
+    point: 0,
+    recommendedToday: false
+  });
+
+  // 오늘 추천 받았는지 확인하는 함수
+  const checkTodayRecommendation = () => {
+    const today = new Date().toDateString(); // "Mon Jan 01 2024" 형식
+    const lastRecommendationDate = localStorage.getItem('lastRecommendationDate');
+    console.log("프론트엔드 제한 확인:", { today, lastRecommendationDate, isRecommended: lastRecommendationDate === today });
+    return lastRecommendationDate === today;
+  };
+
+  // 테스트용: localStorage 초기화 함수 (개발자 도구에서 사용)
+  const resetRecommendationLimit = () => {
+    localStorage.removeItem('lastRecommendationDate');
+    console.log("추천 제한 초기화됨");
+    fetchUserInfo(); // 상태 다시 확인
+  };
+
+  // 개발자 도구에서 사용할 수 있도록 전역 함수로 등록
+  if (typeof window !== 'undefined') {
+    window.resetRecommendationLimit = resetRecommendationLimit;
+  }
+
+  // 사용자 정보 가져오기
+  const fetchUserInfo = async () => {
+    try {
+      console.log("사용자 정보를 가져오는 중...");
+      const response = await UserAPI.getUserSummary();
+      console.log("사용자 정보 API 응답:", response);
+      if (response.success) {
+        // API 데이터를 사용하되, recommendedToday는 프론트엔드 제한으로 덮어쓰기
+        const userData = {
+          ...response.data,
+          recommendedToday: checkTodayRecommendation() // 프론트엔드 제한 우선 적용
+        };
+        setUserInfo(userData);
+        console.log("사용자 정보 업데이트됨 (프론트엔드 제한 적용):", userData);
+      }
+    } catch (error) {
+      console.error("사용자 정보를 가져오는데 실패했습니다:", error);
+      // API 호출 실패 시 기본값 사용
+      setUserInfo({
+        username: "사용자",
+        point: 0,
+        recommendedToday: checkTodayRecommendation() // 프론트엔드에서 확인
+      });
+    }
+  };
+
+  useEffect(() => {
+    fetchUserInfo();
+  }, []);
+
+  // 페이지가 변경될 때마다 사용자 정보 다시 가져오기
+  useEffect(() => {
+    fetchUserInfo();
+  }, [location.pathname]);
+
+  // 컴포넌트가 다시 마운트될 때마다 사용자 정보 새로고침
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (!document.hidden) {
+        fetchUserInfo();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+  }, []);
+
+  // 컴포넌트 마운트 시 localStorage에서 컨디션 상태 복원
+  useEffect(() => {
+    const savedConditions = localStorage.getItem("userConditions");
+    if (savedConditions) {
+      try {
+        const parsedConditions = JSON.parse(savedConditions);
+        setConditionStates(parsedConditions);
+        
+        // 모든 컨디션이 설정되어 있으면 버튼 활성화
+        if (parsedConditions.sleep !== null && parsedConditions.fatigue !== null && parsedConditions.muscle !== null) {
+          setAllConditionsStates(true);
+        }
+      } catch (error) {
+        console.error("저장된 컨디션 데이터를 불러오는데 실패했습니다:", error);
+      }
+    }
+  }, []);
 
   const conditions = [
     {
@@ -232,9 +324,17 @@ export default function CheckConditionSection({ onModalChange }) {
       </CardsContainer>
 
       {allConditionsStates && (
-        <RecomandationButton onClick={handleRecommendationClick}>
-          오늘의 운동 추천
-        </RecomandationButton>
+        <>
+          {userInfo.recommendedToday ? (
+            <AlreadyRecommendedButton disabled>
+              운동 추천은 하루에 한번만!
+            </AlreadyRecommendedButton>
+          ) : (
+            <RecomandationButton onClick={handleRecommendationClick}>
+              오늘의 운동 추천
+            </RecomandationButton>
+          )}
+        </>
       )}
 
       {selectedCondition && (
@@ -658,6 +758,29 @@ const RecomandationButton = styled.button`
 
   &:hover {
     background-color: #08358d;
+    opacity: 0.8;
+  }
+`;
+
+const AlreadyRecommendedButton = styled.button`
+  width: 100%;
+  height: 50px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #e5e5e5;
+  cursor: not-allowed;
+  margin-top: 12.49px;
+  color: #666;
+  font-family: Pretendard;
+  font-size: 20px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 135%; /* 27px */
+  border: none;
+  opacity: 0.8;
+
+  &:disabled {
+    cursor: not-allowed;
     opacity: 0.8;
   }
 `;
