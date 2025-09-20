@@ -6,6 +6,7 @@ import ServiceLayout from "./shared/layouts/ServiceLayout";
 import ProtectedRoute from "./shared/layouts/ProtectedRoute";
 
 import RootPage from "./routes/home/index";
+import LoginPage from "./routes/login/LoginPage";
 // import LoginPage from "./routes/auth/LoginPage";
 // import SignupPage from "./routes/auth/SignupPage";
 
@@ -31,7 +32,7 @@ const router = createBrowserRouter([
     path: "/auth",
     Component: ServiceLayout,
     children: [
-      // { index: true, Component: LoginPage },
+      { index: true, Component: LoginPage },
       // { path: "", Component: LoginPage },
       // { path: "", Component: SignupPage },
     ],
