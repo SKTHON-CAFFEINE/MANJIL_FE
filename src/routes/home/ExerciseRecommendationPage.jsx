@@ -59,6 +59,25 @@ export default function ExerciseRecommendationPage() {
         setLoading(true);
         setError(null);
 
+        // 먼저 오늘 날짜의 저장된 추천 운동이 있는지 확인
+        const today = new Date().toDateString();
+        const savedData = localStorage.getItem(`recommendations_${today}`);
+        
+        if (savedData) {
+          try {
+            const parsedData = JSON.parse(savedData);
+            console.log("저장된 추천 운동 목록 불러옴:", parsedData);
+            setExercises(parsedData.exercises || []);
+            setDiseases(parsedData.diseases || []);
+            setDisclaimer(parsedData.disclaimer || "");
+            setLoading(false);
+            return; // 저장된 데이터가 있으면 API 호출하지 않고 종료
+          } catch (err) {
+            console.error("저장된 데이터 파싱 오류:", err);
+            // 파싱 오류 시 아래 API 호출 로직으로 진행
+          }
+        }
+
         const conditionData = getConditionData();
 
         if (conditionData) {
