@@ -11,17 +11,19 @@ export default function ReportPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [selectedDate, setSelectedDate] = useState(new Date());
-  
+
   // 컨디션 상태 관리 (localStorage에서 불러오거나 기본값 설정)
   const [conditions, setConditions] = useState(() => {
-    const savedConditions = localStorage.getItem('exerciseConditions');
-    return savedConditions ? JSON.parse(savedConditions) : {
-      sleep: "GOOD",
-      fatigue: "LOW",
-      soreness: "NONE"
-    };
+    const savedConditions = localStorage.getItem("exerciseConditions");
+    return savedConditions
+      ? JSON.parse(savedConditions)
+      : {
+          sleep: "GOOD",
+          fatigue: "LOW",
+          soreness: "NONE",
+        };
   });
-  
+
   // eslint-disable-next-line no-unused-vars
   const updateConditions = (newConditions) => setConditions(newConditions);
 
@@ -59,8 +61,8 @@ export default function ReportPage() {
     // 운동 단계 페이지로 이동하며 운동 데이터 전달
     navigate("/exercise-stage", {
       state: {
-        exercise: exercise
-      }
+        exercise: exercise,
+      },
     });
   };
 
@@ -68,10 +70,10 @@ export default function ReportPage() {
   const calculateExerciseProgress = (exercise) => {
     const dateString = formatDateForStorage(selectedDate);
     const savedProgress = getExerciseProgressById(exercise.exerciseId, dateString);
-    
+
     let currentReps = 0;
     let percentage = 0;
-    
+
     if (savedProgress) {
       if (savedProgress.isCompleted) {
         // 운동이 완료된 경우
@@ -83,45 +85,48 @@ export default function ReportPage() {
         percentage = savedProgress.percentage || 0;
       }
     }
-    
+
     const totalReps = exercise.reps;
-    
+
     return { current: currentReps, total: totalReps, percentage };
   };
 
   // API 요청 함수
-  const fetchExercisesForDate = useCallback(async (date) => {
-    setLoading(true);
-    setError(null);
-    
-    try {
-      const dateString = date.toISOString().split('T')[0];
-      
-      // 저장된 컨디션 상태 사용
-      const conditionData = {
-        sleep: conditions.sleep,
-        fatigue: conditions.fatigue,
-        soreness: conditions.soreness
-      };
+  const fetchExercisesForDate = useCallback(
+    async (date) => {
+      setLoading(true);
+      setError(null);
 
-      const response = await ExerciseAPI.getRecommendationsByDate(dateString, conditionData);
-      
-      if (response.success && response.data?.cards) {
-        setExercises(response.data.cards);
-      } else {
-        setError("운동 데이터를 불러올 수 없습니다.");
+      try {
+        const dateString = date.toISOString().split("T")[0];
+
+        // 저장된 컨디션 상태 사용
+        const conditionData = {
+          sleep: conditions.sleep,
+          fatigue: conditions.fatigue,
+          soreness: conditions.soreness,
+        };
+
+        const response = await ExerciseAPI.getRecommendationsByDate(dateString, conditionData);
+
+        if (response.success && response.data?.cards) {
+          setExercises(response.data.cards);
+        } else {
+          setError("운동 데이터를 불러올 수 없습니다.");
+        }
+      } catch (err) {
+        console.error("운동 추천 API 호출 오류:", err);
+        setError("운동 추천을 불러오는 중 오류가 발생했습니다.");
+      } finally {
+        setLoading(false);
       }
-    } catch (err) {
-      console.error("운동 추천 API 호출 오류:", err);
-      setError("운동 추천을 불러오는 중 오류가 발생했습니다.");
-    } finally {
-      setLoading(false);
-    }
-  }, [conditions]);
+    },
+    [conditions]
+  );
 
   // 컨디션 상태를 localStorage에 저장
   useEffect(() => {
-    localStorage.setItem('exerciseConditions', JSON.stringify(conditions));
+    localStorage.setItem("exerciseConditions", JSON.stringify(conditions));
   }, [conditions]);
 
   // 선택된 날짜나 컨디션이 변경될 때마다 API 호출
@@ -133,13 +138,13 @@ export default function ReportPage() {
   useEffect(() => {
     const handleFocus = () => {
       // 페이지가 다시 포커스될 때 운동 목록을 다시 렌더링하여 진행률 업데이트
-      setExercises(prev => [...prev]);
+      setExercises((prev) => [...prev]);
     };
 
-    window.addEventListener('focus', handleFocus);
-    
+    window.addEventListener("focus", handleFocus);
+
     return () => {
-      window.removeEventListener('focus', handleFocus);
+      window.removeEventListener("focus", handleFocus);
     };
   }, []);
 
@@ -166,40 +171,56 @@ export default function ReportPage() {
             <DateNavIcon>›</DateNavIcon>
           </DateNavButton>
         </DateNavigation>
-        
+
         {loading && <LoadingText>운동 추천을 불러오는 중...</LoadingText>}
-        
+
         {error && <ErrorText>{error}</ErrorText>}
-        
+
         {!loading && !error && exercises.length > 0 && (
           <ExerciseList>
             {exercises.map((exercise) => (
               <ExerciseCard key={exercise.exerciseId}>
                 <ExerciseName>{exercise.name}</ExerciseName>
-                <ExerciseReps>{exercise.reps}{exercise.unit}</ExerciseReps>
+                <ExerciseReps>
+                  {exercise.reps}
+                  {exercise.unit}
+                </ExerciseReps>
                 <ExerciseAdvantages>{exercise.advantages}</ExerciseAdvantages>
-                
+
                 {exercise.details && exercise.details.length > 0 && (
                   <ExerciseDetails>
                     {exercise.details.map((detail) => (
                       <ExerciseDetailItem key={detail.id}>
-                        <ExerciseImage src={detail.imageUrl} alt={`${exercise.name} ${detail.id}`} />
+                        <ExerciseImage
+                          src={detail.imageUrl}
+                          alt={`${exercise.name} ${detail.id}`}
+                        />
                         <ExerciseDescription>{detail.description}</ExerciseDescription>
                       </ExerciseDetailItem>
                     ))}
                   </ExerciseDetails>
                 )}
-                
+
                 {/* 오늘 날짜일 때만 각 운동별 진행률과 버튼 표시 */}
                 {isToday() && (
                   <>
                     <ExerciseProgressBar>
-                      <ExerciseProgressText>
-                        <ExerciseCurrentProgress>{calculateExerciseProgress(exercise).current}</ExerciseCurrentProgress>
-                        <ExerciseProgressDivider> / {calculateExerciseProgress(exercise).total}</ExerciseProgressDivider>
-                      </ExerciseProgressText>
+                      <ProgressSection>
+                        <InitialCount>0</InitialCount>
+                        <ExerciseProgressText>
+                          <ExerciseCurrentProgress>
+                            {calculateExerciseProgress(exercise).current}
+                          </ExerciseCurrentProgress>
+                          <ExerciseProgressDivider>
+                            {" "}
+                            / {calculateExerciseProgress(exercise).total}
+                          </ExerciseProgressDivider>
+                        </ExerciseProgressText>
+                      </ProgressSection>
                       <ExerciseProgressBarContainer>
-                        <ExerciseProgressBarFill percentage={calculateExerciseProgress(exercise).percentage} />
+                        <ExerciseProgressBarFill
+                          percentage={calculateExerciseProgress(exercise).percentage}
+                        />
                       </ExerciseProgressBarContainer>
                     </ExerciseProgressBar>
                     <ExerciseRetryButton onClick={() => handleRetryExercise(exercise)}>
@@ -211,7 +232,7 @@ export default function ReportPage() {
             ))}
           </ExerciseList>
         )}
-        
+
         {!loading && !error && exercises.length === 0 && (
           <NoDataText>오늘의 추천 운동이 없습니다.</NoDataText>
         )}
@@ -356,7 +377,7 @@ const ExerciseName = styled.h3`
 `;
 
 const ExerciseReps = styled.p`
-  color: #427BF0;
+  color: #427bf0;
   font-family: Pretendard;
   font-size: 16px;
   font-weight: 600;
@@ -406,22 +427,22 @@ const ExerciseProgressBar = styled.div`
 
 const ExerciseProgressText = styled.div`
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-end;
   align-items: center;
   margin-bottom: 8px;
 `;
 
 const ExerciseCurrentProgress = styled.span`
-  color: #427BF0;
+  color: #427bf0;
   font-family: Pretendard;
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 35px;
+  font-weight: 700;
 `;
 
 const ExerciseProgressDivider = styled.span`
   color: #959595;
   font-family: Pretendard;
-  font-size: 14px;
+  font-size: 20px;
   font-weight: 600;
 `;
 
@@ -434,16 +455,16 @@ const ExerciseProgressBarContainer = styled.div`
 `;
 
 const ExerciseProgressBarFill = styled.div`
-  width: ${props => props.percentage}%;
+  width: ${(props) => props.percentage}%;
   height: 100%;
-  background-color: #427BF0;
+  background-color: #427bf0;
   border-radius: 3px;
   transition: width 0.3s ease;
 `;
 
 const ExerciseRetryButton = styled.button`
   width: 100%;
-  background-color: #427BF0;
+  background-color: #427bf0;
   color: white;
   border: none;
   border-radius: 8px;
@@ -462,4 +483,18 @@ const ExerciseRetryButton = styled.button`
   &:active {
     background-color: #2952a3;
   }
+`;
+
+const ProgressSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+`;
+
+const InitialCount = styled.span`
+  color: #959595;
+  font-family: Pretendard;
+  font-size: 20px;
+  font-weight: 600;
 `;
