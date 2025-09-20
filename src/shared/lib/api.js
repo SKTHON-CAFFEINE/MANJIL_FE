@@ -36,7 +36,7 @@ export const APIService = {
     },
     post: async (url, data = {}, config = {}) => {
       const response = await publicAPI.post(url, data, config);
-      return response.data;
+      return response;
     },
   },
 
