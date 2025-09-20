@@ -30,6 +30,7 @@ const HelloSectionWrapper = styled.div`
 const TextWrapper = styled.div`
   display: flex;
   flex-direction: column;
+  width: 100%;
 `;
 
 const HelloTextWrapper = styled.div`
@@ -59,7 +60,6 @@ const AliasText = styled.div`
 `;
 
 const BadgeWrapper = styled.div`
-  margin-left: 33px;
 `;
 
 const BadgeIcon = styled.img`

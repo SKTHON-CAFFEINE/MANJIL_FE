@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import styled from "styled-components";
 import sleepIcon from "@icon/home/sleep.svg";
 import fatigueIcon from "@icon/home/fatigue.svg";
@@ -118,6 +119,7 @@ const MuscleModal = ({ onClose, onSelect }) => (
 );
 
 export default function CheckConditionSection({ onModalChange }) {
+  const navigate = useNavigate();
   const [selectedCondition, setSelectedCondition] = useState(null);
   const [conditionStates, setConditionStates] = useState({
     sleep: null,
@@ -202,6 +204,18 @@ export default function CheckConditionSection({ onModalChange }) {
     closeModal();
   };
 
+  const handleRecommendationClick = () => {
+    // 컨디션 데이터를 localStorage에 저장
+    localStorage.setItem("userConditions", JSON.stringify(conditionStates));
+    
+    // 운동 추천 페이지로 이동
+    navigate("/exercise-recommendation", {
+      state: {
+        conditionData: conditionStates
+      }
+    });
+  };
+
   return (
     <SectionWrapper>
       <SectionTitle>오늘의 컨디션 체크하기</SectionTitle>
@@ -217,7 +231,11 @@ export default function CheckConditionSection({ onModalChange }) {
         ))}
       </CardsContainer>
 
-      {allConditionsStates && <RecomandationButton>오늘의 운동 추천</RecomandationButton>}
+      {allConditionsStates && (
+        <RecomandationButton onClick={handleRecommendationClick}>
+          오늘의 운동 추천
+        </RecomandationButton>
+      )}
 
       {selectedCondition && (
         <ModalOverlay onClick={closeModal}>
