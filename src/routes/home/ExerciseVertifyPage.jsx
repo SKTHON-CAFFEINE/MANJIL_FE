@@ -12,13 +12,13 @@ export default function ExerciseVertifyPage() {
   const location = useLocation();
   const navigate = useNavigate();
   const exercise = location.state?.exercise;
-  
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   const [count, setCount] = useState(0);
-  const [state, setState] = useState("IDLE");
-  const [angle, setAngle] = useState(0);
+  const [, setState] = useState("IDLE");
+  const [, setAngle] = useState(0);
   const [running, setRunning] = useState(false);
 
   const landmarkerRef = useRef(null);
@@ -160,26 +160,37 @@ export default function ExerciseVertifyPage() {
       </Header>
 
       <ContentContainer>
-        <VertifyTitle>{exercise.name}</VertifyTitle>
-        <div style={{ display: "flex", gap: 8 }}>
-          {!running ? (
-            <button onClick={start}>카메라 켜기</button>
-          ) : (
-            <button onClick={stop}>카메라 끄기</button>
-          )}
-        </div>
+        <TopSection>
+          <VertifyTitle>
+            {exercise.name} {exercise.reps}
+            {exercise.unit}
+          </VertifyTitle>
+          <div style={{ display: "flex", gap: 8 }}>
+            {!running ? (
+              <CameraButton onClick={start}>카메라 켜기</CameraButton>
+            ) : (
+              <CameraButton onClick={stop}>카메라 끄기</CameraButton>
+            )}
+          </div>
+        </TopSection>
 
         <div style={{ marginTop: 20 }}>
           <video ref={videoRef} style={{ display: "none" }} playsInline muted />
-          <canvas ref={canvasRef} style={{ width: "100%", maxWidth: 640, borderRadius: 12 }} />
+          <canvas
+            ref={canvasRef}
+            style={{ width: "100%", maxWidth: 640, borderRadius: 12, height: 488 }}
+          />
         </div>
 
-        <p>COUNT: {count}</p>
-        <p>STATE: {state}</p>
-        <p>KNEE: {angle.toFixed(0)}°</p>
-        <p style={{ color: "#666", marginTop: 8 }}>
-          팁: 측면(사이드뷰)에서 몸 전체가 프레임에 들어오게 촬영해 주세요.
-        </p>
+        <CountText>
+          <HighlightSpan>{count}</HighlightSpan>/{exercise.reps}
+          <SmallHighlight>{exercise.unit}</SmallHighlight>
+        </CountText>
+
+        <ButtonSection>
+          <StopButton>운동 중단</StopButton>
+          <CompleteButton>운동 완료</CompleteButton>
+        </ButtonSection>
       </ContentContainer>
     </ExerciseVertifyPageWrapper>
   );
@@ -189,6 +200,12 @@ const ExerciseVertifyPageWrapper = styled.div``;
 
 const ContentContainer = styled.div`
   padding: 20px;
+`;
+
+const TopSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 const Header = styled.header`
@@ -221,4 +238,107 @@ const HeaderTitle = styled.h1`
   color: #1a1a1a;
 `;
 
-const VertifyTitle = styled.p``;
+const VertifyTitle = styled.p`
+  color: #000;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 34px; /* 141.667% */
+  margin-bottom: 17px;
+`;
+
+const CameraButton = styled.button`
+  width: 120px;
+  height: 33px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  padding: 1px 5px 1px 5px;
+  background: #8583b0;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+
+  &:hover {
+    background: #333159;
+  }
+`;
+
+const CountText = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  color: #000;
+  font-family: Pretendard;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px;
+  justify-content: center;
+  margin-top: 20px;
+`;
+
+const HighlightSpan = styled.span`
+  color: #2f6eee;
+  font-family: Pretendard;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px; /* 70.833% */
+`;
+
+const SmallHighlight = styled.p`
+  color: #000;
+  font-family: Pretendard;
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px; /* 106.25% */
+`;
+
+const ButtonSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 45px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 120px;
+`;
+
+const StopButton = styled.button`
+  width: 161px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #2f6eee;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+`;
+
+const CompleteButton = styled.button`
+  width: 161px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #a4a4a4;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+`;
