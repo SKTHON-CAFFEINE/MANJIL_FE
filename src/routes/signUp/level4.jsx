@@ -17,7 +17,7 @@ export default function Level4() {
 
   const nextLevel =async () => {
     try{
-    const response=await APIService.public.post("/users/register",{formData});
+    const response=await APIService.public.post("/users/register",formData);
     console.log('회원가입 성공:', response);
     resetForm();
     navigate("/auth/signUp");
@@ -33,7 +33,7 @@ export default function Level4() {
         const newState = [...state];
         newState[0] = !newState[0];
         setState(newState);
-        if (state[0]) {
+        if (newState[0]) {
           addDisease(1);
         } else {
           removeDisease(1);
@@ -46,7 +46,7 @@ export default function Level4() {
         newState[1] = !newState[1]; // 원하는 값으로 바꿔주기
         // 업데이트
         setState(newState);
-        if (state[0]) {
+        if (newState[1]) {
           addDisease(2);
         } else {
           removeDisease(2);
@@ -57,7 +57,7 @@ export default function Level4() {
         const newState = [...state];
         newState[2] = !newState[2];
         setState(newState);
-        if (state[0]) {
+        if (newState[2]) {
           addDisease(3);
         } else {
           removeDisease(3);
@@ -68,7 +68,7 @@ export default function Level4() {
         const newState = [...state];
         newState[3] = !newState[3];
         setState(newState);
-        if (state[0]) {
+        if (newState[3]) {
           addDisease(1);
         } else {
           removeDisease(1);
@@ -79,7 +79,7 @@ export default function Level4() {
         const newState = [...state];
         newState[4] = !newState[4];
         setState(newState);
-        if (state[0]) {
+        if (newState[4]) {
           addDisease(1);
         } else {
           removeDisease(1);
