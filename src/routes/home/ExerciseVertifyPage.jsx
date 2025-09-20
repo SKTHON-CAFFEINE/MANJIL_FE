@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import * as vision from "@mediapipe/tasks-vision";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
@@ -11,15 +11,18 @@ const POSE_TASK_URL =
 export default function ExerciseVertifyPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { onModalChange } = useOutletContext();
   const exercise = location.state?.exercise;
-  
+
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
   const [count, setCount] = useState(0);
-  const [state, setState] = useState("IDLE");
-  const [angle, setAngle] = useState(0);
-  const [running, setRunning] = useState(false);
+  const [, setState] = useState("IDLE");
+  const [, setAngle] = useState(0);
+  const [showModal, setShowModal] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
+  const [showCompleteModal, setShowCompleteModal] = useState(false);
 
   const landmarkerRef = useRef(null);
   const rafRef = useRef(0);
@@ -61,9 +64,9 @@ export default function ExerciseVertifyPage() {
       landmarkerRef.current = landmarker;
 
       fsmRef.current = "UP";
-      setCount(0);
+      // 카운트는 초기화하지 않고 현재 값 유지
       setState("READY");
-      setRunning(true);
+      setIsPaused(false);
       kneeEMARef.current = null;
       loop();
     } catch (e) {
@@ -79,7 +82,6 @@ export default function ExerciseVertifyPage() {
     landmarkerRef.current = null;
     streamRef.current?.getTracks?.().forEach((t) => t.stop());
     streamRef.current = null;
-    setRunning(false);
     setState("IDLE");
   }
 
@@ -130,6 +132,43 @@ export default function ExerciseVertifyPage() {
     navigate(-1);
   };
 
+  const handleStopClick = () => {
+    setShowModal(true);
+    onModalChange(true);
+  };
+
+  const handleCancelClick = () => {
+    setShowModal(false);
+    onModalChange(false);
+  };
+
+  const handleConfirmClick = () => {
+    setShowModal(false);
+    onModalChange(false);
+    stop();
+    setIsPaused(true);
+  };
+
+  const handleCompleteClick = () => {
+    setShowCompleteModal(true);
+    onModalChange(true);
+  };
+
+  const handleCompleteCancelClick = () => {
+    setShowCompleteModal(false);
+    onModalChange(false);
+  };
+
+  const handleCompleteConfirmClick = () => {
+    setShowCompleteModal(false);
+    onModalChange(false);
+    // 운동 완료 시 카운트 리셋
+    setCount(0);
+    stop();
+    setIsPaused(false);
+    navigate("/exercise-report");
+  };
+
   useEffect(() => {
     return () => stop();
   }, []);
@@ -160,27 +199,58 @@ export default function ExerciseVertifyPage() {
       </Header>
 
       <ContentContainer>
-        <VertifyTitle>{exercise.name}</VertifyTitle>
-        <div style={{ display: "flex", gap: 8 }}>
-          {!running ? (
-            <button onClick={start}>카메라 켜기</button>
-          ) : (
-            <button onClick={stop}>카메라 끄기</button>
-          )}
-        </div>
+        <TopSection>
+          <VertifyTitle>
+            {exercise.name} {exercise.reps}
+            {exercise.unit}
+          </VertifyTitle>
+          <div style={{ display: "flex", gap: 8 }}>
+            <CameraButton onClick={start}>{isPaused ? "운동 재개" : "카메라 켜기"}</CameraButton>
+          </div>
+        </TopSection>
 
         <div style={{ marginTop: 20 }}>
           <video ref={videoRef} style={{ display: "none" }} playsInline muted />
-          <canvas ref={canvasRef} style={{ width: "100%", maxWidth: 640, borderRadius: 12 }} />
+          <canvas
+            ref={canvasRef}
+            style={{ width: "100%", maxWidth: 640, borderRadius: 12, height: 488 }}
+          />
         </div>
 
-        <p>COUNT: {count}</p>
-        <p>STATE: {state}</p>
-        <p>KNEE: {angle.toFixed(0)}°</p>
-        <p style={{ color: "#666", marginTop: 8 }}>
-          팁: 측면(사이드뷰)에서 몸 전체가 프레임에 들어오게 촬영해 주세요.
-        </p>
+        <CountText>
+          <HighlightSpan>{count}</HighlightSpan>/{exercise.reps}
+          <SmallHighlight>{exercise.unit}</SmallHighlight>
+        </CountText>
+
+        <ButtonSection>
+          <StopButton onClick={handleStopClick}>운동 중단</StopButton>
+          <CompleteButton onClick={handleCompleteClick}>운동 완료</CompleteButton>
+        </ButtonSection>
       </ContentContainer>
+
+      {showModal && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitle>정말로 중단하시겠습니까?</ModalTitle>
+            <ModalButtonContainer>
+              <ModalCancelButton onClick={handleCancelClick}>취소</ModalCancelButton>
+              <ModalConfirmButton onClick={handleConfirmClick}>확인</ModalConfirmButton>
+            </ModalButtonContainer>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
+
+      {showCompleteModal && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitle>운동을 완료하시겠습니까?</ModalTitle>
+            <ModalButtonContainer>
+              <ModalCancelButton onClick={handleCompleteCancelClick}>취소</ModalCancelButton>
+              <ModalConfirmButton onClick={handleCompleteConfirmClick}>완료</ModalConfirmButton>
+            </ModalButtonContainer>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </ExerciseVertifyPageWrapper>
   );
 }
@@ -189,6 +259,12 @@ const ExerciseVertifyPageWrapper = styled.div``;
 
 const ContentContainer = styled.div`
   padding: 20px;
+`;
+
+const TopSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
 `;
 
 const Header = styled.header`
@@ -221,4 +297,178 @@ const HeaderTitle = styled.h1`
   color: #1a1a1a;
 `;
 
-const VertifyTitle = styled.p``;
+const VertifyTitle = styled.p`
+  color: #000;
+  font-family: Pretendard;
+  font-size: 24px;
+  font-style: normal;
+  font-weight: 500;
+  line-height: 34px; /* 141.667% */
+  margin-bottom: 17px;
+`;
+
+const CameraButton = styled.button`
+  width: 120px;
+  height: 33px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  padding: 1px 5px 1px 5px;
+  background: #8583b0;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 19px;
+  font-style: normal;
+  font-weight: 400;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+
+  &:hover {
+    background: #333159;
+  }
+`;
+
+const CountText = styled.div`
+  display: flex;
+  flex-direction: row;
+  gap: 8px;
+  color: #000;
+  font-family: Pretendard;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px;
+  justify-content: center;
+  margin-top: 20px;
+`;
+
+const HighlightSpan = styled.span`
+  color: #2f6eee;
+  font-family: Pretendard;
+  font-size: 48px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px; /* 70.833% */
+`;
+
+const SmallHighlight = styled.p`
+  color: #000;
+  font-family: Pretendard;
+  font-size: 26px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 34px; /* 106.25% */
+`;
+
+const ButtonSection = styled.div`
+  display: flex;
+  flex-direction: row;
+  margin-top: 45px;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  padding-bottom: 120px;
+`;
+
+const StopButton = styled.button`
+  width: 161px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #2f6eee;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+`;
+
+const CompleteButton = styled.button`
+  width: 161px;
+  height: 53px;
+  flex-shrink: 0;
+  border-radius: 10px;
+  background: #a4a4a4;
+  color: #fff;
+  font-family: Pretendard;
+  font-size: 22px;
+  font-style: normal;
+  font-weight: 600;
+  line-height: 100%; /* 22px */
+  letter-spacing: -0.44px;
+  border: none;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 320px;
+  width: 90%;
+`;
+
+const ModalTitle = styled.h2`
+  font-family: Pretendard;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+`;
+
+const ModalButtonContainer = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const ModalCancelButton = styled.button`
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #666;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background: #e8e8e8;
+  }
+`;
+
+const ModalConfirmButton = styled.button`
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  background: #2f6eee;
+  color: white;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+
+  &:hover {
+    background: #1e5ad4;
+  }
+`;

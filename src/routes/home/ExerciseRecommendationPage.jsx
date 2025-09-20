@@ -15,7 +15,7 @@ export default function ExerciseRecommendationPage() {
   // 컨디션 데이터를 location state에서 가져오거나 localStorage에서 가져오기
   const getConditionData = useCallback(() => {
     let conditionData = null;
-    
+
     if (location.state?.conditionData) {
       conditionData = location.state.conditionData;
     } else {
@@ -25,25 +25,29 @@ export default function ExerciseRecommendationPage() {
         conditionData = JSON.parse(savedConditions);
       }
     }
-    
+
     if (conditionData) {
       // UI 값(good/normal/bad)을 API 형식(GOOD/LOW/NONE)으로 변환
       const convertToApiFormat = (value) => {
         switch (value) {
-          case "good": return "GOOD";
-          case "normal": return "LOW";
-          case "bad": return "NONE";
-          default: return "GOOD";
+          case "good":
+            return "GOOD";
+          case "normal":
+            return "LOW";
+          case "bad":
+            return "NONE";
+          default:
+            return "GOOD";
         }
       };
-      
+
       return {
         sleep: convertToApiFormat(conditionData.sleep),
         fatigue: convertToApiFormat(conditionData.fatigue),
-        soreness: convertToApiFormat(conditionData.muscle) // muscle -> soreness
+        soreness: convertToApiFormat(conditionData.muscle), // muscle -> soreness
       };
     }
-    
+
     return null;
   }, [location.state?.conditionData]);
 
@@ -52,17 +56,18 @@ export default function ExerciseRecommendationPage() {
       try {
         setLoading(true);
         setError(null);
-        
+
         const conditionData = getConditionData();
-        
+
         if (conditionData) {
           // 실제 API 호출
           console.log("API 요청 데이터:", conditionData);
           const response = await ExerciseAPI.getRecommendations(conditionData);
           console.log("API 응답:", response);
-          
+
           // API 응답 구조에 맞춰 데이터 처리
           if (response.success && response.data && response.data.cards) {
+            console.log("운동 카드 데이터:", response.data.cards);
             setExercises(response.data.cards);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
@@ -72,11 +77,12 @@ export default function ExerciseRecommendationPage() {
           const defaultConditionData = {
             sleep: "GOOD",
             fatigue: "LOW",
-            soreness: "NONE"
+            soreness: "NONE",
           };
           const response = await ExerciseAPI.getRecommendations(defaultConditionData);
           
           if (response.success && response.data && response.data.cards) {
+            console.log("기본값 운동 카드 데이터:", response.data.cards);
             setExercises(response.data.cards);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
@@ -85,7 +91,7 @@ export default function ExerciseRecommendationPage() {
       } catch (err) {
         console.error("운동 추천 조회 실패:", err);
         setError("운동 추천을 불러오는데 실패했습니다.");
-        
+
         // 에러 시에도 임시 데이터 표시
         const mockExercises = [
           {
@@ -93,8 +99,8 @@ export default function ExerciseRecommendationPage() {
             name: "스쿼트",
             sets: 3,
             value: 12,
-            unit: "회"
-          }
+            unit: "회",
+          },
         ];
         setExercises(mockExercises);
       } finally {
@@ -111,10 +117,10 @@ export default function ExerciseRecommendationPage() {
 
   const handleExerciseClick = (exercise) => {
     // StageExercisePage로 이동하면서 운동 데이터 전달
-    navigate("/exercise-stage", { 
-      state: { 
-        exercise: exercise 
-      } 
+    navigate("/exercise-stage", {
+      state: {
+        exercise: exercise,
+      },
     });
   };
 
@@ -127,9 +133,19 @@ export default function ExerciseRecommendationPage() {
           </BackButton>
           <HeaderTitle>오늘의 맞춤 운동 추천</HeaderTitle>
         </Header>
-        <LoadingContainer>
-          <LoadingText>운동을 추천하고 있어요...</LoadingText>
-        </LoadingContainer>
+
+        <ContentContainer>
+          <IntroSection>
+            <IntroTitle>향숙님에게 필요한 운동을 찾는 중이에요</IntroTitle>
+            <ThinSkeletonCard />
+          </IntroSection>
+
+          <LoadingContainer>
+            <SkeletonCard />
+            <SkeletonCard />
+            <SkeletonCard />
+          </LoadingContainer>
+        </ContentContainer>
       </PageContainer>
     );
   }
@@ -142,7 +158,7 @@ export default function ExerciseRecommendationPage() {
         </BackButton>
         <HeaderTitle>오늘의 맞춤 운동 추천</HeaderTitle>
       </Header>
-      
+
       <ContentContainer>
         <IntroSection>
           <IntroTitle>제일 필요한 운동이에요</IntroTitle>
@@ -151,8 +167,8 @@ export default function ExerciseRecommendationPage() {
 
         <ExerciseList>
           {exercises.map((exercise) => (
-            <ExerciseCard 
-              key={exercise.exerciseId} 
+            <ExerciseCard
+              key={exercise.exerciseId}
               exercise={exercise}
               onClick={() => handleExerciseClick(exercise)}
             />
@@ -210,11 +226,12 @@ const IntroSection = styled.div`
 `;
 
 const IntroTitle = styled.h2`
-  color: #1a1a1a;
-  font-family: Pretendard;
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0 0 8px 0;
+color: #000;
+font-family: Pretendard;
+font-size: 17px;
+font-style: normal;
+font-weight: 500;
+line-height: 36px; /* 180% */
 `;
 
 const IntroSubtitle = styled.p`
@@ -233,14 +250,79 @@ const ExerciseList = styled.div`
 
 const LoadingContainer = styled.div`
   display: flex;
-  justify-content: center;
-  align-items: center;
-  height: 50vh;
+  flex-direction: column;
+  gap: 16px;
 `;
 
-const LoadingText = styled.p`
-  color: #666;
-  font-family: Pretendard;
-  font-size: 16px;
-  font-weight: 500;
+const SkeletonCard = styled.div`
+  width: 100%;
+  height: 120px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 12px;
+  position: relative;
+  overflow: hidden;
+  animation: shimmer 2s infinite ease-in-out;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    animation: shimmer-overlay 2s infinite ease-in-out;
+  }
+
+  @keyframes shimmer {
+    0% {
+      background-position: -200% 0;
+    }
+    100% {
+      background-position: 200% 0;
+    }
+  }
+
+  @keyframes shimmer-overlay {
+    0% {
+      transform: translateX(-100%);
+    }
+    100% {
+      transform: translateX(100%);
+    }
+  }
+`;
+
+const ThinSkeletonCard = styled.div`
+  width: 100%;
+  height: 40px;
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  border-radius: 8px;
+  position: relative;
+  overflow: hidden;
+  animation: shimmer 2s infinite ease-in-out;
+  margin-top: 16px;
+
+  &::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.4) 50%,
+      transparent 100%
+    );
+    animation: shimmer-overlay 2s infinite ease-in-out;
+  }
 `;

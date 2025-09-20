@@ -13,21 +13,32 @@ export default function ExerciseCard({ exercise, onClick }) {
     });
   };
 
+  // 안전한 이미지 URL 추출
+  const getImageUrl = () => {
+    if (!exercise) return "/api/placeholder/100/100";
+    
+    // API 응답 구조에 맞게 details[0].imageUrl 우선 사용
+    return exercise.details?.[0]?.imageUrl || 
+           exercise.details?.[1]?.imageUrl ||
+           exercise.imageUrl || 
+           exercise.image ||
+           "/api/placeholder/100/100";
+  };
+
   return (
     <ExerciseCardWrapper onClick={() => onClick(exercise)}>
       <CardFirstSection>
         <ExerciseImage
-          src={exercise.details[1].imageUrl || "/api/placeholder/100/100"}
-          alt={exercise.name}
+          src={getImageUrl()}
+          alt={exercise?.name || "운동"}
         />
         <ExerciseName>
-          {exercise.name} {exercise.reps}
-          {exercise.unit}
+          {exercise?.name || "운동"} {exercise?.reps || 0}
+          {exercise?.unit || "회"}
         </ExerciseName>
       </CardFirstSection>
       <ExerciseInfo>
-        <ExerciseWarning>무거운 근력 운동, 갑작스러운 전력질주,</ExerciseWarning>
-        <ExerciseWarning>점프 동작은 피하세요.</ExerciseWarning>
+        <ExerciseAdvantage>{exercise?.advantages || "건강에 좋은 운동입니다."}</ExerciseAdvantage>
         <DetailButton onClick={handleDetailClick}>자세히 보기</DetailButton>
       </ExerciseInfo>
     </ExerciseCardWrapper>
@@ -93,13 +104,15 @@ const ExerciseIntensity = styled.p`
   text-align: center;
 `;
 
-const ExerciseWarning = styled.p`
-  color: #000;
+const ExerciseAdvantage = styled.p`
+  color: #666;
   font-family: Pretendard;
-  font-size: 18px;
+  font-size: 16px;
   font-style: normal;
-  font-weight: 500;
-  line-height: 135%; /* 24.3px */
+  font-weight: 400;
+  line-height: 1.5;
+  margin: 0;
+  text-align: center;
 `;
 
 const DetailButton = styled.button`

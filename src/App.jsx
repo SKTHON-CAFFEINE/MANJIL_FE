@@ -22,6 +22,7 @@ import StageExercisePage from "./routes/home/StageExercisePage";
 import ExerciseVertifyPage from "./routes/home/ExerciseVertifyPage";
 import MyPage from "./routes/my/mypage";
 import SignUp from "./routes/signUp";
+import ReportPage from "./routes/home/ReportPage";
 
 const router = createBrowserRouter([
   // 일반 서비스 브랜치 (RootLayout 사용)
@@ -38,6 +39,7 @@ const router = createBrowserRouter([
           { path: "/exercise-recommendation", Component: ExerciseRecommendationPage },
           { path: "/exercise-stage", Component: StageExercisePage },
           { path: "/exercise-vertify", Component: ExerciseVertifyPage },
+          { path: "/exercise-report", Component: ReportPage },
 
           // 캘린더 페이지
           {
