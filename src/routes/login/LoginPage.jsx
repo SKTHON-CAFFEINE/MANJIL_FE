@@ -38,7 +38,7 @@ export default function LoginPage() {
         <Box>
           <Text>이메일</Text>
           <Input
-            placeholder="이메일을 입력하세요."
+            placeholder="manjil@skuniv.ac.kr"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -46,7 +46,7 @@ export default function LoginPage() {
         <Box>
           <Text>비밀번호</Text>
           <Input
-            placeholder="비밀번호를 입력하세요."
+            placeholder="영문, 숫자, 특수기호 조합, 8~20자"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
