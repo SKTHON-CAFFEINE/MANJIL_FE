@@ -65,11 +65,24 @@ export const APIService = {
   },
 };
 
+// 사용자 관련 API
+export const UserAPI = {
+  // 사용자 요약 정보 조회
+  getUserSummary: async () => {
+    return await APIService.private.get("/users/summary");
+  },
+};
+
 // 운동 추천 관련 API
 export const ExerciseAPI = {
   // 오늘의 맞춤 운동 추천 조회 (맨몸운동)
   getRecommendations: async (conditionData) => {
     return await APIService.private.post("/reco/bodyweight", conditionData);
+  },
+
+  // 특정 날짜의 운동 추천 생성 및 저장
+  getRecommendationsByDate: async (date, conditionData) => {
+    return await APIService.private.post(`/reco/bodyweight/${date}`, conditionData);
   },
 
   // 운동 상세 정보 조회

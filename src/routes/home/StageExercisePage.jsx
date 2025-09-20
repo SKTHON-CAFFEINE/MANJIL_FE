@@ -35,6 +35,13 @@ export default function StageExercisePage() {
     );
   }
 
+  // 디버깅을 위한 콘솔 로그
+  console.log("Exercise data:", exercise);
+  console.log("Diseases:", exercise?.diseases);
+  console.log("Disclaimer:", exercise?.disclaimer);
+  console.log("Diseases length:", exercise?.diseases?.length);
+  console.log("Has diseases:", !!exercise?.diseases);
+
   return (
     <PageContainer>
       <Header>
@@ -70,12 +77,20 @@ export default function StageExercisePage() {
 
         <CautionCard>
           <CautionTitle>주의사항</CautionTitle>
-          {exercise?.diseases?.map((disease, index) => (
-            <CautionText key={disease.id ?? index}>
-              {index + 1}. {disease.type}: {disease.caution || "특별한 주의사항이 없습니다."}
-            </CautionText>
-          ))}
-          {(!exercise?.diseases || exercise.diseases.length === 0) && (
+          {exercise?.diseases && exercise.diseases.length > 0 ? (
+            <>
+              {exercise.diseases.map((disease, index) => (
+                <CautionText key={disease.id ?? index}>
+                  <strong>{disease.type}:</strong> {disease.caution}
+                </CautionText>
+              ))}
+              {exercise?.disclaimer && (
+                <CautionText style={{ marginTop: '12px', fontStyle: 'italic', color: '#666' }}>
+                  {exercise.disclaimer}
+                </CautionText>
+              )}
+            </>
+          ) : (
             <CautionText>특별한 주의사항이 없습니다.</CautionText>
           )}
         </CautionCard>

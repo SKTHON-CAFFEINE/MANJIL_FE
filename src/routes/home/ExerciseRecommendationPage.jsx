@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
-import { ExerciseAPI } from "../../shared/lib/api";
+import { ExerciseAPI, UserAPI } from "../../shared/lib/api";
 import ExerciseCard from "./ExerciseCard";
 
 export default function ExerciseRecommendationPage() {
@@ -11,6 +11,8 @@ export default function ExerciseRecommendationPage() {
   const [exercises, setExercises] = useState([]);
   const [loading, setLoading] = useState(true);
   const [, setError] = useState(null);
+  const [diseases, setDiseases] = useState([]);
+  const [disclaimer, setDisclaimer] = useState("");
 
   // 컨디션 데이터를 location state에서 가져오거나 localStorage에서 가져오기
   const getConditionData = useCallback(() => {
@@ -60,30 +62,67 @@ export default function ExerciseRecommendationPage() {
         const conditionData = getConditionData();
 
         if (conditionData) {
-          // 실제 API 호출
+          // 실제 API 호출 - 오늘 날짜로 운동 추천 생성 및 저장
           console.log("API 요청 데이터:", conditionData);
-          const response = await ExerciseAPI.getRecommendations(conditionData);
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+          const response = await ExerciseAPI.getRecommendationsByDate(today, conditionData);
           console.log("API 응답:", response);
 
           // API 응답 구조에 맞춰 데이터 처리
           if (response.success && response.data && response.data.cards) {
             console.log("운동 카드 데이터:", response.data.cards);
+            console.log("API 응답 전체:", response);
+            console.log("API 응답 데이터:", response.data);
+            console.log("Diseases in response:", response.data.diseases);
+            console.log("Disclaimer in response:", response.data.disclaimer);
+            
             setExercises(response.data.cards);
+            setDiseases(response.data.diseases || []);
+            setDisclaimer(response.data.disclaimer || "");
+            
+            // 운동 추천을 받은 후 localStorage에 오늘 날짜 저장 (프론트엔드 제한)
+            const today = new Date().toDateString();
+            localStorage.setItem('lastRecommendationDate', today);
+            console.log("오늘 운동 추천 완료 - localStorage에 저장:", today);
+            
+            // 추천 운동 목록도 localStorage에 저장 (캘린더 페이지에서 사용)
+            const exerciseData = {
+              exercises: response.data.cards,
+              diseases: response.data.diseases || [],
+              disclaimer: response.data.disclaimer || ""
+            };
+            localStorage.setItem(`recommendations_${today}`, JSON.stringify(exerciseData));
+            console.log("추천 운동 목록 저장됨:", exerciseData);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
           }
         } else {
-          // 컨디션 데이터가 없으면 기본값으로 API 호출
+          // 컨디션 데이터가 없으면 기본값으로 API 호출 - 오늘 날짜로 운동 추천 생성 및 저장
           const defaultConditionData = {
             sleep: "GOOD",
             fatigue: "LOW",
             soreness: "NONE",
           };
-          const response = await ExerciseAPI.getRecommendations(defaultConditionData);
+          const today = new Date().toISOString().split('T')[0]; // YYYY-MM-DD 형식
+          const response = await ExerciseAPI.getRecommendationsByDate(today, defaultConditionData);
           
           if (response.success && response.data && response.data.cards) {
             console.log("기본값 운동 카드 데이터:", response.data.cards);
             setExercises(response.data.cards);
+            
+            // 운동 추천을 받은 후 localStorage에 오늘 날짜 저장 (프론트엔드 제한)
+            const today = new Date().toDateString();
+            localStorage.setItem('lastRecommendationDate', today);
+            console.log("오늘 운동 추천 완료 (기본값) - localStorage에 저장:", today);
+            
+            // 추천 운동 목록도 localStorage에 저장 (캘린더 페이지에서 사용)
+            const exerciseData = {
+              exercises: response.data.cards,
+              diseases: response.data.diseases || [],
+              disclaimer: response.data.disclaimer || ""
+            };
+            localStorage.setItem(`recommendations_${today}`, JSON.stringify(exerciseData));
+            console.log("추천 운동 목록 저장됨 (기본값):", exerciseData);
           } else {
             throw new Error(response.message || "운동 추천 데이터를 가져올 수 없습니다.");
           }
@@ -116,10 +155,21 @@ export default function ExerciseRecommendationPage() {
   };
 
   const handleExerciseClick = (exercise) => {
-    // StageExercisePage로 이동하면서 운동 데이터 전달
+    console.log("ExerciseRecommendationPage - Diseases data:", diseases);
+    console.log("ExerciseRecommendationPage - Disclaimer:", disclaimer);
+    
+    const exerciseWithDiseases = {
+      ...exercise,
+      diseases: diseases,
+      disclaimer: disclaimer
+    };
+    
+    console.log("ExerciseRecommendationPage - Exercise with diseases:", exerciseWithDiseases);
+    
+    // StageExercisePage로 이동하면서 운동 데이터와 만성질환 정보 전달
     navigate("/exercise-stage", {
       state: {
-        exercise: exercise,
+        exercise: exerciseWithDiseases,
       },
     });
   };
@@ -165,15 +215,15 @@ export default function ExerciseRecommendationPage() {
           <IntroSubtitle>운동을 선택하면 단계별 설명이 나옵니다.</IntroSubtitle>
         </IntroSection>
 
-        <ExerciseList>
-          {exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.exerciseId}
-              exercise={exercise}
-              onClick={() => handleExerciseClick(exercise)}
-            />
-          ))}
-        </ExerciseList>
+          <ExerciseList>
+            {exercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.exerciseId}
+                exercise={exercise}
+                onClick={() => handleExerciseClick(exercise)}
+              />
+            ))}
+          </ExerciseList>
       </ContentContainer>
     </PageContainer>
   );
