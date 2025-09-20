@@ -21,6 +21,7 @@ import Calender from "./routes/calender/index";
 
 import My from "./routes/my/index";
 import StageExercisePage from "./routes/home/StageExercisePage";
+import ExerciseVertifyPage from "./routes/home/ExerciseVertifyPage";
 
 const router = createBrowserRouter([
   // 일반 서비스 브랜치 (RootLayout 사용)
@@ -36,6 +37,7 @@ const router = createBrowserRouter([
           { path: "/verify", Component: VerifySquat },
           { path: "/exercise-recommendation", Component: ExerciseRecommendationPage },
           { path: "/exercise-stage", Component: StageExercisePage },
+          { path: "/exercise-vertify", Component: ExerciseVertifyPage },
 
           // 캘린더 페이지
           {

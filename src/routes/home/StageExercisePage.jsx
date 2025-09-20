@@ -12,7 +12,7 @@ export default function StageExercisePage() {
   };
 
   const handleStartExercise = () => {
-    // 운동 시작 로직 (나중에 구현)
+    navigate("/exercise-vertify");
     console.log("운동 시작:", exercise);
   };
 
