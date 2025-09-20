@@ -14,6 +14,12 @@ import Level4 from "./routes/signUp/level4";
 // import LoginPage from "./routes/auth/LoginPage";
 // import SignupPage from "./routes/auth/SignupPage";
 
+import VerifySquat from "./routes/verify/VerifySquat";
+
+import Calender from "./routes/calender/index";
+
+import My from "./routes/my/index";
+
 const router = createBrowserRouter([
   // 일반 서비스 브랜치 (RootLayout 사용)
   {
@@ -25,6 +31,25 @@ const router = createBrowserRouter([
         children: [
           // 보호가 필요한 페이지들
           // { path: "", Component:  },
+          { path: "/verify", Component: VerifySquat },
+
+          // 캘린더 페이지
+          {
+            path: "/calender",
+            children: [
+              { index: true, Component: Calender },
+              // { path: "", Component:  },
+            ],
+          },
+
+          // 마이페이지
+          {
+            path: "/my",
+            children: [
+              { index: true, Component: My },
+              // { path: "", Component:  },
+            ],
+          },
         ],
       },
       // 기타 공개 페이지들
@@ -44,7 +69,6 @@ const router = createBrowserRouter([
       // { path: "", Component: SignupPage },
     ],
   },
-
 ]);
 
 function App() {
