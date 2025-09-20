@@ -5,7 +5,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
-  const navigate=useNavigate();
+  const navigate = useNavigate();
   const [email, setEmail] = useState();
   const [password, setPassword] = useState();
   const [fail, setFail] = useState(false);
@@ -23,7 +23,7 @@ export default function LoginPage() {
         localStorage.setItem("accessToken", token);
         navigate("/");
       }
-      
+
       return response;
     } catch (error) {
       console.error("로그인 실패:", error);
@@ -38,7 +38,7 @@ export default function LoginPage() {
         <Box>
           <Text>이메일</Text>
           <Input
-            placeholder="이메일을 입력하세요."
+            placeholder="manjil@skuniv.ac.kr"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
@@ -46,7 +46,8 @@ export default function LoginPage() {
         <Box>
           <Text>비밀번호</Text>
           <Input
-            placeholder="비밀번호를 입력하세요."
+            type="password"
+            placeholder="영문, 숫자, 특수기호 조합, 8~20자"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />

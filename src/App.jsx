@@ -18,10 +18,10 @@ import VerifySquat from "./routes/verify/VerifySquat";
 import ExerciseRecommendationPage from "./routes/home/ExerciseRecommendationPage";
 
 import Calender from "./routes/calender/index";
-
-import My from "./routes/my/index";
 import StageExercisePage from "./routes/home/StageExercisePage";
 import ExerciseVertifyPage from "./routes/home/ExerciseVertifyPage";
+import MyPage from "./routes/my/mypage";
+import SignUp from "./routes/signUp";
 import ReportPage from "./routes/home/ReportPage";
 
 const router = createBrowserRouter([
@@ -54,7 +54,7 @@ const router = createBrowserRouter([
           {
             path: "/my",
             children: [
-              { index: true, Component: My },
+              { index: true, Component: MyPage },
               // { path: "", Component:  },
             ],
           },
@@ -70,6 +70,7 @@ const router = createBrowserRouter([
     Component: ServiceLayout,
     children: [
       { index: true, Component: LoginPage },
+      { path: "signUp", Component: SignUp },
       { path: "signUp/level1", Component: Level1 },
       { path: "signUp/level2", Component: Level2 },
       { path: "signUp/level3", Component: Level3 },
