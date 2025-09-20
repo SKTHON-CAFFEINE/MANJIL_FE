@@ -29,7 +29,7 @@ export default function Level1() {
         password: password, // 또는 간단히 password
       });
       console.log("로그인 성공:", response);
-      setStep1Data({email:email,password:password});
+      setStep1Data({ email: email, password: password });
       navigate("/auth/signUp/level2");
     } catch (error) {
       console.error("로그인 실패:", error);
@@ -71,16 +71,17 @@ export default function Level1() {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
           />
-          {(fail==1 || fail==3) && <Fail>이메일 양식에 맞지 않습니다.</Fail>}
+          {(fail == 1 || fail == 3) && <Fail>이메일 양식에 맞지 않습니다.</Fail>}
         </Box>
         <Box>
           <Text>비밀번호</Text>
           <Input
+            type="password"
             placeholder="영문, 숫자, 특수기호 조합, 8~20자"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
           />
-          {(fail==2 || fail==3)&&<Fail>비밀번호 형식에 맞지 않습니다.</Fail>}
+          {(fail == 2 || fail == 3) && <Fail>비밀번호 형식에 맞지 않습니다.</Fail>}
         </Box>
       </InputGroup>
       <Button onClick={() => nextLevel()}>다음</Button>
