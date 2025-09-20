@@ -1,13 +1,16 @@
+import { useOutletContext } from "react-router";
 import styled from "styled-components";
 import HelloSection from "./HelloSection";
 import CheckConditionSection from "./CheckConditionSection";
 import WhereMeSection from "./WhereMeSection";
 
 export default function HomePage() {
+  const { onModalChange } = useOutletContext();
+
   return (
     <HomePageWrapper>
       <HelloSection />
-      <CheckConditionSection />
+      <CheckConditionSection onModalChange={onModalChange} />
       <WhereMeSection />
     </HomePageWrapper>
   );
@@ -16,5 +19,5 @@ export default function HomePage() {
 const HomePageWrapper = styled.div`
   display: flex;
   flex-direction: column;
-  gap: 20px;
+  gap: 0;
 `;

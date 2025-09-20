@@ -25,7 +25,6 @@ const HelloSectionWrapper = styled.div`
   padding: 20px 29px 35px 20px;
   display: flex;
   flex-direction: row;
-  border-radius: 0;
 `;
 
 const TextWrapper = styled.div`
