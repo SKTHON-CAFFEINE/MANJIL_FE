@@ -15,6 +15,7 @@ import Level4 from "./routes/signUp/level4";
 // import SignupPage from "./routes/auth/SignupPage";
 
 import VerifySquat from "./routes/verify/VerifySquat";
+import ExerciseRecommendationPage from "./routes/home/ExerciseRecommendationPage";
 
 import Calender from "./routes/calender/index";
 
@@ -32,6 +33,7 @@ const router = createBrowserRouter([
           // 보호가 필요한 페이지들
           // { path: "", Component:  },
           { path: "/verify", Component: VerifySquat },
+          { path: "/exercise-recommendation", Component: ExerciseRecommendationPage },
 
           // 캘린더 페이지
           {
