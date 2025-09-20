@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useNavigate, useLocation } from "react-router";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
@@ -13,7 +13,7 @@ export default function ExerciseRecommendationPage() {
   const [, setError] = useState(null);
 
   // 컨디션 데이터를 location state에서 가져오거나 localStorage에서 가져오기
-  const getConditionData = () => {
+  const getConditionData = useCallback(() => {
     let conditionData = null;
     
     if (location.state?.conditionData) {
@@ -45,7 +45,7 @@ export default function ExerciseRecommendationPage() {
     }
     
     return null;
-  };
+  }, [location.state?.conditionData]);
 
   useEffect(() => {
     const fetchRecommendations = async () => {
@@ -103,15 +103,19 @@ export default function ExerciseRecommendationPage() {
     };
 
     fetchRecommendations();
-  }, []);
+  }, [getConditionData]);
 
   const handleBackClick = () => {
     navigate(-1);
   };
 
-  const handleExerciseClick = (exerciseId) => {
-    // 운동 상세 페이지로 이동 (나중에 구현)
-    console.log("운동 클릭:", exerciseId);
+  const handleExerciseClick = (exercise) => {
+    // StageExercisePage로 이동하면서 운동 데이터 전달
+    navigate("/exercise-stage", { 
+      state: { 
+        exercise: exercise 
+      } 
+    });
   };
 
   if (loading) {
@@ -150,7 +154,7 @@ export default function ExerciseRecommendationPage() {
             <ExerciseCard 
               key={exercise.exerciseId} 
               exercise={exercise}
-              onClick={handleExerciseClick}
+              onClick={() => handleExerciseClick(exercise)}
             />
           ))}
         </ExerciseList>

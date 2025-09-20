@@ -4,19 +4,31 @@ import styled from "styled-components";
 export default function ExerciseCard({ exercise, onClick }) {
   const navigate = useNavigate();
 
+  const handleDetailClick = (e) => {
+    e.stopPropagation(); // 부모 클릭 이벤트 방지
+    navigate("/exercise-stage", {
+      state: {
+        exercise: exercise,
+      },
+    });
+  };
+
   return (
-    <ExerciseCardWrapper onClick={() => onClick(exercise.exerciseId)}>
+    <ExerciseCardWrapper onClick={() => onClick(exercise)}>
       <CardFirstSection>
-        <ExerciseImage src="/api/placeholder/100/100" alt={exercise.name} />
+        <ExerciseImage
+          src={exercise.details[1].imageUrl || "/api/placeholder/100/100"}
+          alt={exercise.name}
+        />
         <ExerciseName>
-          {exercise.name} {exercise.value}
+          {exercise.name} {exercise.reps}
           {exercise.unit}
         </ExerciseName>
       </CardFirstSection>
       <ExerciseInfo>
         <ExerciseWarning>무거운 근력 운동, 갑작스러운 전력질주,</ExerciseWarning>
         <ExerciseWarning>점프 동작은 피하세요.</ExerciseWarning>
-        <DetailButton onClick={() => navigate("/exercise-stage")}>자세히 보기</DetailButton>
+        <DetailButton onClick={handleDetailClick}>자세히 보기</DetailButton>
       </ExerciseInfo>
     </ExerciseCardWrapper>
   );
@@ -69,6 +81,15 @@ const ExerciseName = styled.h3`
   font-size: 24px;
   font-weight: 700;
   margin: 0;
+  text-align: center;
+`;
+
+const ExerciseIntensity = styled.p`
+  color: #2f6eee;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 600;
+  margin: 0 0 8px 0;
   text-align: center;
 `;
 
