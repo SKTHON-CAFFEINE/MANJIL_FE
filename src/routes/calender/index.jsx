@@ -3,6 +3,7 @@ import { useState, useEffect, useCallback } from "react";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
 import { ExerciseAPI } from "../../shared/lib/api";
+import { getExerciseProgressById, formatDateForStorage } from "../../shared/lib/exerciseProgress";
 
 export default function ReportPage() {
   const navigate = useNavigate();
@@ -54,17 +55,36 @@ export default function ReportPage() {
   };
 
   // 맞춤 운동 다시하기 버튼 클릭 핸들러
-  const handleRetryExercise = (exerciseId) => {
-    // 해당 운동으로 이동 (운동 인증 페이지로 이동)
-    navigate(`/exercise/verify/${exerciseId}`);
+  const handleRetryExercise = (exercise) => {
+    // 운동 단계 페이지로 이동하며 운동 데이터 전달
+    navigate("/exercise-stage", {
+      state: {
+        exercise: exercise
+      }
+    });
   };
 
   // 개별 운동 진행률 계산
   const calculateExerciseProgress = (exercise) => {
-    // 임시로 현재까지 한 횟수를 0으로 설정 (실제로는 API에서 받아와야 함)
-    const currentReps = 0;
+    const dateString = formatDateForStorage(selectedDate);
+    const savedProgress = getExerciseProgressById(exercise.exerciseId, dateString);
+    
+    let currentReps = 0;
+    let percentage = 0;
+    
+    if (savedProgress) {
+      if (savedProgress.isCompleted) {
+        // 운동이 완료된 경우
+        currentReps = exercise.reps;
+        percentage = 100;
+      } else {
+        // 운동이 진행 중인 경우
+        currentReps = savedProgress.currentCount || 0;
+        percentage = savedProgress.percentage || 0;
+      }
+    }
+    
     const totalReps = exercise.reps;
-    const percentage = totalReps > 0 ? Math.round((currentReps / totalReps) * 100) : 0;
     
     return { current: currentReps, total: totalReps, percentage };
   };
@@ -108,6 +128,20 @@ export default function ReportPage() {
   useEffect(() => {
     fetchExercisesForDate(selectedDate);
   }, [selectedDate, fetchExercisesForDate]);
+
+  // 페이지가 다시 포커스될 때 진행률 업데이트를 위한 이벤트 리스너
+  useEffect(() => {
+    const handleFocus = () => {
+      // 페이지가 다시 포커스될 때 운동 목록을 다시 렌더링하여 진행률 업데이트
+      setExercises(prev => [...prev]);
+    };
+
+    window.addEventListener('focus', handleFocus);
+    
+    return () => {
+      window.removeEventListener('focus', handleFocus);
+    };
+  }, []);
 
   const handleBackClick = () => {
     navigate(-1);
@@ -161,14 +195,14 @@ export default function ReportPage() {
                   <>
                     <ExerciseProgressBar>
                       <ExerciseProgressText>
-                        <ExerciseCurrentProgress>{calculateExerciseProgress(exercise).percentage}</ExerciseCurrentProgress>
-                        <ExerciseProgressDivider> / 100</ExerciseProgressDivider>
+                        <ExerciseCurrentProgress>{calculateExerciseProgress(exercise).current}</ExerciseCurrentProgress>
+                        <ExerciseProgressDivider> / {calculateExerciseProgress(exercise).total}</ExerciseProgressDivider>
                       </ExerciseProgressText>
                       <ExerciseProgressBarContainer>
                         <ExerciseProgressBarFill percentage={calculateExerciseProgress(exercise).percentage} />
                       </ExerciseProgressBarContainer>
                     </ExerciseProgressBar>
-                    <ExerciseRetryButton onClick={() => handleRetryExercise(exercise.exerciseId)}>
+                    <ExerciseRetryButton onClick={() => handleRetryExercise(exercise)}>
                       맞춤 운동 다시하기
                     </ExerciseRetryButton>
                   </>

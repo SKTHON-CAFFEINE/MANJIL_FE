@@ -3,6 +3,7 @@ import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import * as vision from "@mediapipe/tasks-vision";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
+import { saveExerciseProgress, markExerciseComplete, formatDateForStorage, getExerciseProgressById } from "../../shared/lib/exerciseProgress";
 
 const VISION_WASM_URL = "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.15/wasm";
 const POSE_TASK_URL =
@@ -123,7 +124,15 @@ export default function ExerciseVertifyPage() {
     if (fsmRef.current === "GOING_DOWN" && kneeDeg < MIN_DEPTH_DEG) fsmRef.current = "DOWN";
     if (fsmRef.current === "DOWN" && kneeDeg > MAX_UP_DEG) {
       fsmRef.current = "UP";
-      setCount((c) => c + 1);
+      setCount((c) => {
+        const newCount = c + 1;
+        // 카운트가 올라갈 때마다 localStorage에 저장
+        if (exercise) {
+          const today = formatDateForStorage(new Date());
+          saveExerciseProgress(exercise.exerciseId, newCount, exercise.reps, today);
+        }
+        return newCount;
+      });
     }
     setState(fsmRef.current);
   }
@@ -162,12 +171,30 @@ export default function ExerciseVertifyPage() {
   const handleCompleteConfirmClick = () => {
     setShowCompleteModal(false);
     onModalChange(false);
+    
+    // 운동 완료 상태 저장
+    if (exercise) {
+      const today = formatDateForStorage(new Date());
+      markExerciseComplete(exercise.exerciseId, today);
+    }
+    
     // 운동 완료 시 카운트 리셋
     setCount(0);
     stop();
     setIsPaused(false);
     navigate("/exercise-report");
   };
+
+  // 페이지 로드 시 저장된 카운트 불러오기
+  useEffect(() => {
+    if (exercise) {
+      const today = formatDateForStorage(new Date());
+      const savedProgress = getExerciseProgressById(exercise.exerciseId, today);
+      if (savedProgress && !savedProgress.isCompleted) {
+        setCount(savedProgress.currentCount);
+      }
+    }
+  }, [exercise]);
 
   useEffect(() => {
     return () => stop();
