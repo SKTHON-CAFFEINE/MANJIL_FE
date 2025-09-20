@@ -1,22 +1,59 @@
 import styled from "styled-components";
 import logo from "../../shared/assets/icon/Text_Logo.svg";
+import { APIService } from "../../shared/lib/api";
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 export default function LoginPage() {
+  const navigate=useNavigate();
+  const [email, setEmail] = useState();
+  const [password, setPassword] = useState();
+  const [fail, setFail] = useState(false);
+
+  const login = async () => {
+    try {
+      // API 호출 시 두 번째 인자로 이메일과 비밀번호를 담은 객체를 전달
+      const response = await APIService.public.post("/auth/login", {
+        email: email, // 또는 간단히 email
+        password: password, // 또는 간단히 password
+      });
+      console.log("로그인 성공:", response);
+      const token = response.headers["authorization"]?.split(" ")[1];
+      if (token) {
+        localStorage.setItem("accessToken", token);
+        navigate("/");
+      }
+      
+      return response;
+    } catch (error) {
+      console.error("로그인 실패:", error);
+      setFail(1);
+    }
+  };
+
   return (
     <Page>
       <img src={logo} style={{ marginTop: "107px", marginBottom: "41px" }} />
       <Group>
-      <Box>
-        <Text>이메일</Text>
-        <Input placeholder="이메일을 입력하세요." />
-      </Box>
-      <Box>
-        <Text>비밀번호</Text>
-        <Input placeholder="비밀번호를 입력하세요." />
-      </Box>
+        <Box>
+          <Text>이메일</Text>
+          <Input
+            placeholder="이메일을 입력하세요."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+        </Box>
+        <Box>
+          <Text>비밀번호</Text>
+          <Input
+            placeholder="비밀번호를 입력하세요."
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+          />
+        </Box>
       </Group>
-      <Fail>이메일 또는 비밀번호가 올바르지 않습니다. </Fail>
-      <Button>로그인</Button>
+      {fail && <Fail>이메일 또는 비밀번호가 올바르지 않습니다. </Fail>}
+      <Button onClick={() => login()}>로그인</Button>
     </Page>
   );
 }
@@ -27,11 +64,11 @@ const Page = styled.div`
   align-items: center;
   height: 100vh;
 `;
-const Group=styled.div`
+const Group = styled.div`
   display: flex;
   flex-direction: column;
   gap: 25px;
-`
+`;
 const Box = styled.div`
   display: flex;
   flex-direction: column;
