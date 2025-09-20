@@ -65,6 +65,14 @@ export const APIService = {
   },
 };
 
+// 사용자 관련 API
+export const UserAPI = {
+  // 사용자 요약 정보 조회
+  getUserSummary: async () => {
+    return await APIService.private.get("/users/summary");
+  },
+};
+
 // 운동 추천 관련 API
 export const ExerciseAPI = {
   // 오늘의 맞춤 운동 추천 조회 (맨몸운동)
