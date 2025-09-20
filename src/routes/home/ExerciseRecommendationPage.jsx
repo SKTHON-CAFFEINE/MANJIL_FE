@@ -165,15 +165,15 @@ export default function ExerciseRecommendationPage() {
           <IntroSubtitle>운동을 선택하면 단계별 설명이 나옵니다.</IntroSubtitle>
         </IntroSection>
 
-        <ExerciseList>
-          {exercises.map((exercise) => (
-            <ExerciseCard
-              key={exercise.exerciseId}
-              exercise={exercise}
-              onClick={() => handleExerciseClick(exercise)}
-            />
-          ))}
-        </ExerciseList>
+          <ExerciseList>
+            {exercises.map((exercise) => (
+              <ExerciseCard
+                key={exercise.exerciseId}
+                exercise={exercise}
+                onClick={() => handleExerciseClick(exercise)}
+              />
+            ))}
+          </ExerciseList>
       </ContentContainer>
     </PageContainer>
   );
