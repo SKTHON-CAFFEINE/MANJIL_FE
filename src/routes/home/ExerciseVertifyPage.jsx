@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { useNavigate, useLocation } from "react-router-dom";
+import { useNavigate, useLocation, useOutletContext } from "react-router-dom";
 import * as vision from "@mediapipe/tasks-vision";
 import styled from "styled-components";
 import backIcon from "@icon/home/goBack.svg";
@@ -11,6 +11,7 @@ const POSE_TASK_URL =
 export default function ExerciseVertifyPage() {
   const location = useLocation();
   const navigate = useNavigate();
+  const { onModalChange } = useOutletContext();
   const exercise = location.state?.exercise;
 
   const videoRef = useRef(null);
@@ -19,7 +20,8 @@ export default function ExerciseVertifyPage() {
   const [count, setCount] = useState(0);
   const [, setState] = useState("IDLE");
   const [, setAngle] = useState(0);
-  const [running, setRunning] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isPaused, setIsPaused] = useState(false);
 
   const landmarkerRef = useRef(null);
   const rafRef = useRef(0);
@@ -61,9 +63,9 @@ export default function ExerciseVertifyPage() {
       landmarkerRef.current = landmarker;
 
       fsmRef.current = "UP";
-      setCount(0);
+      // 카운트는 초기화하지 않고 현재 값 유지
       setState("READY");
-      setRunning(true);
+      setIsPaused(false);
       kneeEMARef.current = null;
       loop();
     } catch (e) {
@@ -79,7 +81,6 @@ export default function ExerciseVertifyPage() {
     landmarkerRef.current = null;
     streamRef.current?.getTracks?.().forEach((t) => t.stop());
     streamRef.current = null;
-    setRunning(false);
     setState("IDLE");
   }
 
@@ -130,6 +131,32 @@ export default function ExerciseVertifyPage() {
     navigate(-1);
   };
 
+  const handleStopClick = () => {
+    setShowModal(true);
+    onModalChange(true);
+  };
+
+  const handleCancelClick = () => {
+    setShowModal(false);
+    onModalChange(false);
+  };
+
+  const handleConfirmClick = () => {
+    setShowModal(false);
+    onModalChange(false);
+    stop();
+    setIsPaused(true);
+  };
+
+  const handleCompleteClick = () => {
+    // 운동 완료 시 카운트 리셋
+    setCount(0);
+    stop();
+    setIsPaused(false);
+    // 운동 완료 후 다른 페이지로 이동하거나 성공 메시지 표시
+    alert("운동을 완료했습니다!");
+  };
+
   useEffect(() => {
     return () => stop();
   }, []);
@@ -166,11 +193,9 @@ export default function ExerciseVertifyPage() {
             {exercise.unit}
           </VertifyTitle>
           <div style={{ display: "flex", gap: 8 }}>
-            {!running ? (
-              <CameraButton onClick={start}>카메라 켜기</CameraButton>
-            ) : (
-              <CameraButton onClick={stop}>카메라 끄기</CameraButton>
-            )}
+            <CameraButton onClick={start}>
+              {isPaused ? "운동 재개" : "카메라 켜기"}
+            </CameraButton>
           </div>
         </TopSection>
 
@@ -188,10 +213,26 @@ export default function ExerciseVertifyPage() {
         </CountText>
 
         <ButtonSection>
-          <StopButton>운동 중단</StopButton>
-          <CompleteButton>운동 완료</CompleteButton>
+          <StopButton onClick={handleStopClick}>운동 중단</StopButton>
+          <CompleteButton onClick={handleCompleteClick}>운동 완료</CompleteButton>
         </ButtonSection>
       </ContentContainer>
+
+      {showModal && (
+        <ModalOverlay>
+          <ModalContainer>
+            <ModalTitle>정말로 중단하시겠습니까?</ModalTitle>
+            <ModalButtonContainer>
+              <ModalCancelButton onClick={handleCancelClick}>
+                취소
+              </ModalCancelButton>
+              <ModalConfirmButton onClick={handleConfirmClick}>
+                확인
+              </ModalConfirmButton>
+            </ModalButtonContainer>
+          </ModalContainer>
+        </ModalOverlay>
+      )}
     </ExerciseVertifyPageWrapper>
   );
 }
@@ -341,4 +382,75 @@ const CompleteButton = styled.button`
   line-height: 100%; /* 22px */
   letter-spacing: -0.44px;
   border: none;
+`;
+
+const ModalOverlay = styled.div`
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+`;
+
+const ModalContainer = styled.div`
+  background: white;
+  border-radius: 12px;
+  padding: 32px 24px 24px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+  max-width: 320px;
+  width: 90%;
+`;
+
+const ModalTitle = styled.h2`
+  font-family: Pretendard;
+  font-size: 18px;
+  font-weight: 500;
+  color: #1a1a1a;
+  text-align: center;
+  margin: 0 0 24px 0;
+  line-height: 1.4;
+`;
+
+const ModalButtonContainer = styled.div`
+  display: flex;
+  gap: 12px;
+`;
+
+const ModalCancelButton = styled.button`
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  background: #f5f5f5;
+  color: #666;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  
+  &:hover {
+    background: #e8e8e8;
+  }
+`;
+
+const ModalConfirmButton = styled.button`
+  flex: 1;
+  height: 44px;
+  border-radius: 8px;
+  background: #2f6eee;
+  color: white;
+  font-family: Pretendard;
+  font-size: 16px;
+  font-weight: 500;
+  border: none;
+  cursor: pointer;
+  
+  &:hover {
+    background: #1e5ad4;
+  }
 `;
