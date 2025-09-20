@@ -7,6 +7,7 @@ import ProtectedRoute from "./shared/layouts/ProtectedRoute";
 
 import RootPage from "./routes/home/index";
 import LoginPage from "./routes/login/LoginPage";
+import SignUpPage from "./routes/signUp/signUpPage";
 // import LoginPage from "./routes/auth/LoginPage";
 // import SignupPage from "./routes/auth/SignupPage";
 
@@ -33,7 +34,7 @@ const router = createBrowserRouter([
     Component: ServiceLayout,
     children: [
       { index: true, Component: LoginPage },
-      // { path: "", Component: LoginPage },
+      { path: "signUp", Component: SignUpPage },
       // { path: "", Component: SignupPage },
     ],
   },
