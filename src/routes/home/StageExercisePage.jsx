@@ -11,9 +11,12 @@ export default function StageExercisePage() {
     navigate(-1);
   };
 
-  const handleStartExercise = () => {
-    navigate("/exercise-vertify");
-    console.log("운동 시작:", exercise);
+  const handleStartExercise = (exercise) => {
+    navigate("/exercise-vertify", {
+      state: {
+        exercise: exercise
+      }
+    });
   };
 
   if (!exercise) {
@@ -77,7 +80,7 @@ export default function StageExercisePage() {
           )}
         </CautionCard>
 
-        <StartButton onClick={handleStartExercise}>운동 시작</StartButton>
+        <StartButton onClick={() => handleStartExercise(exercise)}>운동 시작</StartButton>
       </ContentContainer>
     </PageContainer>
   );
