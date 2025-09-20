@@ -7,6 +7,10 @@ import ProtectedRoute from "./shared/layouts/ProtectedRoute";
 
 import RootPage from "./routes/home/index";
 import LoginPage from "./routes/login/LoginPage";
+import Level1 from "./routes/signUp/level1";
+import Level2 from "./routes/signUp/level2";
+import Level3 from "./routes/signUp/level3";
+import Level4 from "./routes/signUp/level4";
 // import LoginPage from "./routes/auth/LoginPage";
 // import SignupPage from "./routes/auth/SignupPage";
 
@@ -58,7 +62,10 @@ const router = createBrowserRouter([
     Component: ServiceLayout,
     children: [
       { index: true, Component: LoginPage },
-      // { path: "", Component: LoginPage },
+      { path: "signUp/level1", Component: Level1 },
+      { path: "signUp/level2", Component: Level2 },
+      { path: "signUp/level3", Component: Level3 },
+      { path: "signUp/level4", Component: Level4 },
       // { path: "", Component: SignupPage },
     ],
   },
