@@ -65,4 +65,22 @@ export const APIService = {
   },
 };
 
+// 운동 추천 관련 API
+export const ExerciseAPI = {
+  // 오늘의 맞춤 운동 추천 조회 (맨몸운동)
+  getRecommendations: async (conditionData) => {
+    return await APIService.private.post("/reco/bodyweight", conditionData);
+  },
+
+  // 운동 상세 정보 조회
+  getExerciseDetail: async (exerciseId) => {
+    return await APIService.private.get(`/exercise/${exerciseId}`);
+  },
+
+  // 운동 완료 기록
+  completeExercise: async (exerciseId, completionData) => {
+    return await APIService.private.post(`/exercise/${exerciseId}/complete`, completionData);
+  },
+};
+
 export { publicAPI, privateAPI };

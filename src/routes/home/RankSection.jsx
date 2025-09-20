@@ -46,6 +46,7 @@ const NormalText = styled.p`
   font-style: normal;
   font-weight: 500;
   line-height: 125%; /* 25px */
+  margin-bottom: 3px;
 `;
 
 const HighlightText = styled.p`
